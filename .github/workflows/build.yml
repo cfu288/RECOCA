@@ -1,0 +1,115 @@
+name: Build Cross-Platform Executables
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+        include:
+          - os: macos-latest
+            platform: darwin
+            arch: x64,arm64
+          - os: windows-latest
+            platform: win32
+            arch: x64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build for macOS (both Intel and ARM)
+        if: matrix.os == 'macos-latest'
+        run: |
+          # Build for Intel (x64)
+          npm run make -- --arch=x64
+          # Build for ARM (arm64) 
+          npm run make -- --arch=arm64
+
+      - name: Build for Windows
+        if: matrix.os == 'windows-latest'
+        run: npm run make -- --arch=x64
+
+      - name: Upload macOS Intel artifacts
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-intel-x64
+          path: |
+            out/make/**/*x64*
+            out/make/**/darwin/x64/**
+          retention-days: 30
+
+      - name: Upload macOS ARM artifacts
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-arm64
+          path: |
+            out/make/**/*arm64*
+            out/make/**/darwin/arm64/**
+          retention-days: 30
+
+      - name: Upload Windows artifacts
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64
+          path: |
+            out/make/**/*.exe
+            out/make/**/*.msi
+            out/make/**/win32/**
+          retention-days: 30
+
+  create-release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Display structure of downloaded files
+        run: ls -la dist/
+
+      - name: Get package version
+        id: package-version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.package-version.outputs.version }}-${{ github.run_number }}
+          name: Release v${{ steps.package-version.outputs.version }}-${{ github.run_number }}
+          draft: false
+          prerelease: false
+          files: |
+            dist/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
