@@ -1,6 +1,7 @@
 import * as path from "path";
 import * as fs from "fs";
 import { app } from "electron";
+import { type pl } from "nodejs-polars";
 
 interface LoadingStrategy {
   name: string;
@@ -155,7 +156,7 @@ class PlatformSpecificStrategy implements LoadingStrategy {
 /**
  * I struggled to get nodejs-polars to load, so now we try multiple strategies.
  */
-export function loadPolars() {
+export function loadPolars(): typeof pl {
   const strategies: LoadingStrategy[] = [
     new StandardLoadingStrategy(),
     new PathManipulationStrategy(),
@@ -171,7 +172,7 @@ export function loadPolars() {
       console.log(
         `✓ Successfully loaded nodejs-polars using ${strategy.name} strategy`
       );
-      return result;
+      return result as typeof pl;
     } catch (error) {
       const errorObj =
         error instanceof Error ? error : new Error(String(error));

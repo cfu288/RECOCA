@@ -1,12 +1,13 @@
 import { loadPolars } from "../../core/data/loaders/polars-loader";
 import { BrowserWindow, app, dialog } from "electron";
+import { type pl } from "nodejs-polars";
 
-let pl: any = null;
+let polarsInstance: typeof pl | null = null;
 
-export function getPolars() {
-  if (pl === null) {
+export function getPolars(): typeof pl {
+  if (polarsInstance === null) {
     try {
-      pl = loadPolars();
+      polarsInstance = loadPolars();
       console.log("Successfully loaded polars");
     } catch (error) {
       console.error("Failed to load polars:", error);
@@ -24,7 +25,7 @@ export function getPolars() {
       throw error;
     }
   }
-  return pl;
+  return polarsInstance;
 }
 
 /**
