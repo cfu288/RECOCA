@@ -1,12 +1,22 @@
 import * as React from "react";
 import { useActiveFile } from "../../../shared/providers/ActiveFileProvider";
-import { Button } from "../../../shared/components/ui/button";
-import { Card, CardContent } from "../../../shared/components/ui/card";
-
-import { X } from "lucide-react";
 import { RecentFiles } from "./RecentFiles";
+import { SheetSelector } from "./SheetSelector";
+import { FileUploadCard } from "./FileUploadCard";
+import { FileUploadHeader } from "./FileUploadHeader";
+import { SheetSelectorSkeleton } from "./SheetSelectorSkeleton";
 import { Screens, ProcessingStatus } from "../../../app/app";
+import { isExcelFile } from "../../../core/data/loaders/excel-loader";
+import { fileUploadReducer } from "../utils/file-upload-reducer";
+import { formatFileSize, isValidFileType } from "../utils/file-upload-helpers";
 
+/**
+ * Main file upload screen component
+ * Handles CSV and Excel file uploads with support for multi-sheet Excel files
+ * @param onScreenChange - Callback to navigate to different screens
+ * @param onProcessingComplete - Callback when file processing is complete
+ * @param fileProcessingStatus - Initial processing status from parent
+ */
 export const UploadFileScreen: React.FC<{
   onScreenChange?: (screen: Screens) => void;
   onProcessingComplete?: (status: ProcessingStatus) => void;
@@ -17,92 +27,189 @@ export const UploadFileScreen: React.FC<{
   fileProcessingStatus = { status: "pending" },
 }) => {
   const { activeFile, setActiveFile } = useActiveFile();
-  const [processingStatus, setProcessingStatus] =
-    React.useState<ProcessingStatus>(fileProcessingStatus);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  const [state, dispatch] = React.useReducer(fileUploadReducer, {
+    processingStatus: fileProcessingStatus,
+    showSheetSelector: false,
+    excelSheets: [],
+    pendingFile: null,
+    cachedFileContents: null,
+  });
+
+  const {
+    processingStatus,
+    showSheetSelector,
+    excelSheets,
+    pendingFile,
+    cachedFileContents,
+  } = state;
+  
+  console.debug('[UploadFileScreen] Current state:', {
+    status: processingStatus.status,
+    showSheetSelector,
+    hasActiveFile: !!activeFile,
+    activeFileName: activeFile?.name,
+  });
+
   React.useEffect(() => {
-    if (activeFile && processingStatus.status === "pending") {
-      setProcessingStatus({
-        status: "uploaded",
-        columns: processingStatus.columns,
-        previews: processingStatus.previews,
-      });
-    }
+    console.debug('[useEffect] activeFile changed:', {
+      activeFile: activeFile?.name,
+      currentStatus: processingStatus.status,
+      isExcel: activeFile ? isExcelFile(activeFile.name) : false,
+    });
   }, [activeFile]);
 
   React.useEffect(() => {
-    setProcessingStatus(fileProcessingStatus);
+    dispatch({ type: "UPDATE_FROM_PROPS", payload: fileProcessingStatus });
   }, [fileProcessingStatus]);
 
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+
+  /**
+   * Reads file contents based on file type (Excel or CSV)
+   * Caches Excel file contents to avoid re-reading when selecting different sheets
+   */
+  const readFileContents = async (file: File, selectedSheet?: string): Promise<string | ArrayBuffer> => {
+    if (isExcelFile(file.name)) {
+      if (selectedSheet && cachedFileContents) {
+        return cachedFileContents;
+      }
+      
+      const contents = await new Promise<ArrayBuffer>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as ArrayBuffer);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsArrayBuffer(file);
+      });
+      
+      if (!selectedSheet) {
+        dispatch({ type: "SET_CACHED_CONTENTS", payload: contents });
+      }
+      return contents;
+    }
+    
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsText(file);
+    });
   };
 
-  const processFile = async (file: File) => {
-    try {
-      // Update status to processing
-      setProcessingStatus({ status: "processing" });
+  /**
+   * Saves processed file to recent files list for quick access
+   */
+  const saveFileToRecent = async (file: File, fileContents: string | ArrayBuffer, filePath: string) => {
+    await window.electron.addRecentFile({
+      name: file.name,
+      path: filePath,
+      size: typeof fileContents === "string" ? fileContents.length : fileContents.byteLength,
+    });
+  };
 
-      console.log("Sending file for processing:", {
+  /**
+   * Processes the result from file handler and updates state accordingly
+   * Handles both Excel files (with sheet selection) and regular CSV files
+   */
+  type FileProcessingResult = {
+    success: boolean;
+    message: string;
+    columns?: string[];
+    previews?: Record<string, string[]>;
+    filePath?: string;
+    isExcel?: boolean;
+    sheets?: Array<{ name: string; rowCount: number; columnCount: number }>;
+  };
+
+  const handleProcessingResult = (result: FileProcessingResult, file: File) => {
+    if (result.isExcel && result.sheets) {
+      console.debug('[processFile] Excel file with sheets detected - keeping processing state');
+      dispatch({
+        type: "HANDLE_EXCEL_FILE",
+        payload: { sheets: result.sheets, file },
+      });
+      return;
+    }
+
+    const newStatus: ProcessingStatus = {
+      status: result.success ? "uploaded" : "error",
+      message: result.message,
+      columns: result.columns,
+      previews: result.previews,
+    };
+    
+    console.debug('[processFile] Setting completion status:', newStatus.status);
+    dispatch({
+      type: "COMPLETE_PROCESSING",
+      payload: { status: newStatus, success: result.success },
+    });
+
+    if (result.success && result.columns) {
+      if (onProcessingComplete) {
+        onProcessingComplete(newStatus);
+      }
+      if (onScreenChange) {
+        onScreenChange("column-mapping");
+      }
+    }
+  };
+
+  /**
+   * Main file processing function that orchestrates file reading,
+   * sending to backend, and handling the response
+   */
+  const processFile = async (file: File, selectedSheet?: string) => {
+    console.debug('[processFile] Starting:', {
+      fileName: file.name,
+      selectedSheet,
+      currentStatus: processingStatus.status,
+      isExcel: isExcelFile(file.name),
+    });
+    
+    try {
+      console.debug('[processFile] Dispatching START_PROCESSING');
+      dispatch({ type: "START_PROCESSING" });
+
+      console.debug("Sending file for processing:", {
         name: file.name,
         size: file.size,
         formattedSize: formatFileSize(file.size),
         type: file.type,
+        selectedSheet,
       });
 
-      const fileContents = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = () => reject(reader.error);
-        reader.readAsText(file);
-      });
-
-      console.log("File contents size:", fileContents.length, "bytes");
+      const fileContents = await readFileContents(file, selectedSheet);
 
       const result = await window.electron.handleNewFile(
         fileContents,
-        file.name
+        file.name,
+        selectedSheet
       );
 
-      if (result.success) {
-        await window.electron.addRecentFile({
-          name: file.name,
-          path: result.filePath,
-          size: fileContents.length, // Use the actual content size in bytes
-        });
+      if (result.success && result.filePath) {
+        await saveFileToRecent(file, fileContents, result.filePath);
       }
 
-      console.log(result);
+      console.debug('[processFile] Result received:', {
+        success: result.success,
+        isExcel: result.isExcel,
+        hasSheets: !!result.sheets,
+        columns: result.columns?.length,
+      });
 
-      // Update status based on result
-      const newStatus: ProcessingStatus = {
-        status: result.success ? "uploaded" : "error",
-        message: result.message,
-        columns: result.columns,
-        previews: result.previews,
-      };
-      setProcessingStatus(newStatus);
-
-      // If processing was successful and we have columns, move to column mapping screen
-      if (result.success && result.columns) {
-        if (onProcessingComplete) {
-          onProcessingComplete(newStatus);
-        }
-        if (onScreenChange) {
-          onScreenChange("column-mapping");
-        }
-      }
+      handleProcessingResult(result, file);
     } catch (error) {
       console.error("Error in processFile:", error);
-      setProcessingStatus({
-        status: "error",
-        message:
-          error instanceof Error ? error.message : "Unknown error occurred",
+      dispatch({
+        type: "COMPLETE_PROCESSING",
+        payload: {
+          status: {
+            status: "error",
+            message:
+              error instanceof Error ? error.message : "Unknown error occurred",
+          },
+          success: false,
+        },
       });
     }
   };
@@ -118,144 +225,101 @@ export const UploadFileScreen: React.FC<{
     if (!files || files.length === 0) return;
 
     const file = files[0];
-    if (file.type === "text/csv" || file.name.endsWith(".csv")) {
-      console.log("Selected file:", {
-        name: file.name,
+    
+    if (isValidFileType(file)) {
+      console.debug('[handleFileInputChange] File selected:', {
+        fileName: file.name,
         size: formatFileSize(file.size),
         type: file.type,
+        isExcel: isExcelFile(file.name),
+        currentStatus: processingStatus.status,
       });
-
+      
       setActiveFile({
         name: file.name,
         file: file,
         size: file.size,
       });
 
-      setProcessingStatus({ status: "pending" });
-
       processFile(file);
     } else {
-      console.log("Please select a CSV file");
+      console.debug("Please select a CSV or Excel file");
     }
 
-    // Reset the file input value so the same file can be selected again
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
   const removeFile = () => {
+    console.debug('[removeFile] Removing file');
     setActiveFile(null);
-    setProcessingStatus({ status: "pending" });
+    dispatch({ type: "RESET_FILE_STATE" });
   };
 
-  const getStatusColor = (status: typeof processingStatus.status) => {
-    switch (status) {
-      case "pending":
-        return "text-yellow-600";
-      case "processing":
-        return "text-blue-600";
-      case "uploaded":
-        return "text-green-600";
-      case "processed":
-        return "text-green-600";
-      case "error":
-        return "text-red-600";
-      default:
-        return "text-gray-600";
+  /**
+   * Handles Excel sheet selection from the sheet selector dialog
+   */
+  const handleSheetSelect = async (sheetName: string) => {
+    dispatch({ type: "SET_SHEET_SELECTOR", payload: { show: false } });
+    if (pendingFile) {
+      await processFile(pendingFile, sheetName);
     }
   };
 
-  const getStatusText = () => {
-    switch (processingStatus.status) {
-      case "pending":
-        return "Pending";
-      case "processing":
-        return "Processing...";
-      case "uploaded":
-        return "Uploaded";
-      case "processed":
-        return processingStatus.message || "Processed";
-      case "error":
-        return processingStatus.message || "Error";
-      default:
-        return "";
-    }
+  const handleSheetSelectorCancel = () => {
+    dispatch({ type: "RESET_FILE_STATE" });
+    setActiveFile(null);
   };
+
+  /**
+   * Handles file selection from the recent files list
+   */
+  const handleRecentFileSelect = async (file: File) => {
+    console.debug('[RecentFiles] File selected:', {
+      fileName: file.name,
+      isExcel: isExcelFile(file.name),
+      currentStatus: processingStatus.status,
+    });
+    
+    setActiveFile({
+      name: file.name,
+      file: file,
+      size: file.size,
+    });
+    
+    await processFile(file);
+  };
+
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold">Recoca</h1>
-      <div className="space-y-4">
-        <p className="text-gray-600">
-          Recoca (Resident Continuity of Care App) is an open-source toolkit for
-          calculating continuity of care metrics for resident primary care or
-          outpatient clinics.
-        </p>
-        <p className="text-gray-600">
-          To get started, upload a CSV with your clinic's appointment data. The
-          CSV should contain data related to an appointment including:
-          <ul className="list-disc list-inside">
-            <li>The date of the appointment</li>
-            <li>The patient seen during this appointment</li>
-            <li>The provider who saw the patient</li>
-          </ul>
-        </p>
-      </div>
-      <Card className="rounded-lg">
-        <CardContent className="p-8">
-          {!activeFile ? (
-            <div className="flex flex-col items-center justify-center space-y-4">
-              <p className="text-lg text-gray-600 m-0 text-center">
-                Upload a CSV file to get started
-              </p>
-              <Button onClick={handleFileSelect} variant="default">
-                Select File
-              </Button>
-              <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept=".csv,text/csv"
-                onChange={handleFileInputChange}
-              />
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {activeFile.name}
-                  </p>
-                  <div className="flex items-center space-x-2">
-                    <p className="text-sm text-gray-500">
-                      {formatFileSize(activeFile.size)}
-                    </p>
-                    <span className="text-gray-300">•</span>
-                    <p
-                      className={`text-sm ${getStatusColor(
-                        processingStatus.status
-                      )}`}
-                    >
-                      {getStatusText()}
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={removeFile}
-                  disabled={processingStatus.status === "processing"}
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <FileUploadHeader />
+      
+      <FileUploadCard
+        activeFile={activeFile}
+        processingStatus={processingStatus}
+        onFileSelect={handleFileSelect}
+        onFileRemove={removeFile}
+        fileInputRef={fileInputRef}
+        onFileInputChange={handleFileInputChange}
+      />
 
-      {!activeFile && <RecentFiles onFileSelect={processFile} />}
+      {processingStatus.status === "processing" && activeFile && isExcelFile(activeFile.name) && !showSheetSelector && (
+        <SheetSelectorSkeleton />
+      )}
+
+      {showSheetSelector && (
+        <SheetSelector
+          sheets={excelSheets}
+          onSheetSelect={handleSheetSelect}
+          onCancel={handleSheetSelectorCancel}
+        />
+      )}
+
+      {!activeFile && !showSheetSelector && (
+        <RecentFiles onFileSelect={handleRecentFileSelect} />
+      )}
     </div>
   );
 };

@@ -95,6 +95,7 @@ export interface ElectronAPI {
   // File operations
   checkFileExists: (filePath: string) => Promise<boolean>;
   readLocalFile: (filePath: string) => Promise<string>;
+  readLocalBinaryFile: (filePath: string) => Promise<Buffer>;
   forPatientIdGetTopProviders: (
     filePath: string,
     patientIdCol: string,

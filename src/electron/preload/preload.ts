@@ -6,8 +6,8 @@ import { contextBridge, ipcRenderer } from "electron";
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
 contextBridge.exposeInMainWorld("electron", {
-  handleNewFile: (fileContents: string, fileName: string) =>
-    ipcRenderer.invoke("handleNewFile", fileContents, fileName),
+  handleNewFile: (fileContents: string | ArrayBuffer, fileName: string, selectedSheet?: string) =>
+    ipcRenderer.invoke("handleNewFile", fileContents, fileName, selectedSheet),
   returnSelectedColumns: (filePath: string, columnMapping: any) =>
     ipcRenderer.invoke("returnSelectedColumns", filePath, columnMapping),
   getColumnPreview: (filePath: string, columnName: string) =>
@@ -26,6 +26,8 @@ contextBridge.exposeInMainWorld("electron", {
     ipcRenderer.invoke("checkFileExists", filePath),
   readLocalFile: (filePath: string) =>
     ipcRenderer.invoke("readLocalFile", filePath),
+  readLocalBinaryFile: (filePath: string) =>
+    ipcRenderer.invoke("readLocalBinaryFile", filePath),
   saveColumnMapping: (fileName: string, mapping: any) =>
     ipcRenderer.invoke("saveColumnMapping", { fileName, mapping }),
   getColumnMapping: (fileName: string) =>

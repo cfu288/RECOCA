@@ -1,6 +1,7 @@
 import { ipcMain } from "electron";
 import { getCurrentDataFrame } from "./file-handlers";
 import { getPolars } from "./shared";
+import { isExcelDateSerial, excelDateToJSDate } from "../../core/data/loaders/excel-loader";
 import {
   calculateTopProviders,
   PatientVisitRecord,
@@ -15,6 +16,24 @@ import { calculateUpcIndex } from "../../core/continuity/indices/upc-index";
 import { calculateCocIndex } from "../../core/continuity/indices/coc-index";
 import { calculateSeconIndex } from "../../core/continuity/indices/secon-index";
 import { calculateMmciIndex } from "../../core/continuity/indices/mmci-index";
+
+/**
+ * Converts a value to a date string, handling Excel date serials.
+ * 
+ * @param value - Value that may be an Excel date serial or string
+ * @returns ISO date string or string representation of the value
+ */
+function convertValueToDateString(value: unknown): string {
+  if (isExcelDateSerial(value)) {
+    try {
+      const jsDate = excelDateToJSDate(value as number);
+      return jsDate.toISOString().split('T')[0];
+    } catch {
+      return String(value);
+    }
+  }
+  return String(value);
+}
 
 /**
  * Apply filters to a DataFrame based on column mapping configuration.
@@ -193,7 +212,7 @@ export function registerAnalyticsHandlers() {
               patientRecord.middleName = String(record[patientMiddleNameCol]);
             }
             if (patientDateOfBirthCol && record[patientDateOfBirthCol]) {
-              patientRecord.dateOfBirth = String(record[patientDateOfBirthCol]);
+              patientRecord.dateOfBirth = convertValueToDateString(record[patientDateOfBirthCol]);
             }
             if (patientRaceCol && record[patientRaceCol]) {
               patientRecord.race = String(record[patientRaceCol]);

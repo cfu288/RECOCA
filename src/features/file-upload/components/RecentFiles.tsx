@@ -8,6 +8,7 @@ import {
 import { ScrollArea } from "../../../shared/components/ui/scroll-area";
 import { X, Clock, FileText } from "lucide-react";
 import { useActiveFile } from "../../../shared/providers/ActiveFileProvider";
+import { isExcelFile } from "../../../core/data/loaders/excel-loader";
 
 interface RecentFile {
   name: string;
@@ -93,12 +94,25 @@ export const RecentFiles: React.FC<RecentFilesProps> = ({ onFileSelect }) => {
         return;
       }
 
-      const fileContents = await window.electron.readLocalFile(recentFile.path);
-      console.log("File contents size:", fileContents.length, "bytes");
+      let file: File;
 
-      const file = new File([fileContents], recentFile.name, {
-        type: "text/csv",
-      });
+      if (isExcelFile(recentFile.name)) {
+        const fileBuffer = await window.electron.readLocalBinaryFile(
+          recentFile.path
+        );
+
+        file = new File([fileBuffer], recentFile.name, {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+      } else {
+        const fileContents = await window.electron.readLocalFile(
+          recentFile.path
+        );
+
+        file = new File([fileContents], recentFile.name, {
+          type: "text/csv",
+        });
+      }
 
       console.log(
         "Created File object size:",
@@ -161,7 +175,7 @@ export const RecentFiles: React.FC<RecentFilesProps> = ({ onFileSelect }) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[300px] pr-4">
+        <ScrollArea className="h-[300px]">
           <div className="space-y-2">
             {recentFiles.map((file) => (
               <div

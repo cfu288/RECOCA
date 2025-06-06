@@ -7,6 +7,11 @@ import {
   addRecentFile,
 } from "../../features/file-upload/services/file-manager";
 import { getPolars } from "./shared";
+import {
+  getExcelFileInfo,
+  convertSheetToJSON,
+  isExcelFile,
+} from "../../core/data/loaders/excel-loader";
 
 let currentDf: any = null;
 
@@ -50,36 +55,59 @@ export function registerFileHandlers() {
     }
   });
 
+  ipcMain.handle("readLocalBinaryFile", (_, filePath: string) => {
+    try {
+      return fs.readFileSync(filePath);
+    } catch (error) {
+      console.error("Error reading binary file:", error);
+      throw error;
+    }
+  });
+
   ipcMain.handle(
     "handleNewFile",
-    async (_event, fileContents: string, fileName: string) => {
+    async (_event, fileContents: string | ArrayBuffer, fileName: string, selectedSheet?: string) => {
       try {
+        
         const tempDir = path.join(app.getPath("userData"), "temp");
         if (!fs.existsSync(tempDir)) {
           fs.mkdirSync(tempDir, { recursive: true });
         }
 
-        // Reuse existing file path to avoid duplicate temp files for the same upload
-        const recentFiles = loadRecentFiles();
-        const existingFile = recentFiles.find((f) => f.name === fileName);
+        let df;
         let filePath: string;
+        const timestamp = Date.now();
 
-        if (existingFile && fs.existsSync(existingFile.path)) {
-          filePath = existingFile.path;
-          fs.writeFileSync(filePath, fileContents);
+        if (isExcelFile(fileName)) {
+          const fileBuffer = Buffer.from(fileContents as ArrayBuffer);
+          
+          if (!selectedSheet || selectedSheet.trim() === '') {
+            const excelInfo = getExcelFileInfo(fileBuffer);
+            return {
+              success: false,
+              isExcel: true,
+              sheets: excelInfo.sheets,
+              message: "Sheet selection required",
+            };
+          }
+
+          const jsonData = convertSheetToJSON(fileBuffer, selectedSheet);
+          df = getPolars().DataFrame(jsonData);
+          
+          filePath = path.join(tempDir, `file_${timestamp}.xlsx`);
+          fs.writeFileSync(filePath, fileBuffer);
         } else {
-          const timestamp = Date.now();
+          const csvContent = typeof fileContents === 'string' ? fileContents : fileContents.toString();
+          df = getPolars().readCSV(csvContent, {
+            hasHeader: true,
+            quoteChar: '"',
+          });
+          
           filePath = path.join(tempDir, `file_${timestamp}.csv`);
-          fs.writeFileSync(filePath, fileContents);
+          fs.writeFileSync(filePath, csvContent);
         }
 
-        const df = getPolars().readCSV(fileContents, {
-          hasHeader: true,
-          quoteChar: '"',
-        });
-
         currentDf = df;
-
         const columns = df.columns;
 
         const previews: Record<string, string[]> = {};

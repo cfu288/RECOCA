@@ -8,6 +8,7 @@ import { ColumnMappingScreen } from "../features/column-mapping/components/Colum
 import { UploadFileScreen } from "../features/file-upload/components/UploadFileScreen";
 import { ResultsScreen } from "../features/analytics/components/ResultsScreen";
 import { BreadcrumbNav } from "../features/navigation/components/BreadcrumbNav";
+import { ExcelSheet } from "../core/data/loaders/excel-loader";
 
 export interface ColumnMapping {
   residentIdentifier: string;
@@ -35,6 +36,8 @@ export interface ProcessingStatus {
   message?: string;
   columns?: string[];
   previews?: Record<string, string[]>;
+  isExcel?: boolean;
+  sheets?: ExcelSheet[];
   statistics?: {
     filtered: {
       uniqueResidents: number;

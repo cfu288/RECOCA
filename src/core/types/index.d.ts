@@ -1,21 +1,47 @@
 import {
   ColumnMapping,
   RecentFile,
-} from "../../features/file-upload/services/fileManager";
+} from "../../features/file-upload/services/file-manager";
 
 declare global {
   interface ElectronAPI {
-    handleNewFile: (fileContents: string, fileName: string) => Promise<any>;
+    handleNewFile: (
+      fileContents: string | ArrayBuffer, 
+      fileName: string, 
+      selectedSheet?: string
+    ) => Promise<{
+      success: boolean;
+      message: string;
+      columns?: string[];
+      previews?: Record<string, string[]>;
+      filePath?: string;
+      isExcel?: boolean;
+      sheets?: Array<{ name: string; rowCount: number; columnCount: number }>;
+    }>;
     returnSelectedColumns: (
       filePath: string,
       columnMapping: ColumnMapping
-    ) => Promise<any>;
-    getColumnPreview: (filePath: string, columnName: string) => Promise<any>;
+    ) => Promise<{
+      success: boolean;
+      message: string;
+      [key: string]: unknown;
+    }>;
+    getColumnPreview: (filePath: string, columnName: string) => Promise<{
+      success: boolean;
+      message?: string;
+      preview?: string[];
+      uniqueValues?: string[];
+    }>;
     validateColumn: (
       filePath: string,
       columnName: string,
       columnType: "identifier" | "date"
-    ) => Promise<any>;
+    ) => Promise<{
+      success: boolean;
+      isValid: boolean;
+      status: "valid" | "warning" | "error";
+      message?: string;
+    }>;
     getRecentFiles: () => Promise<RecentFile[]>;
     addRecentFile: (fileInfo: {
       path: string;
@@ -25,6 +51,7 @@ declare global {
     removeRecentFile: (filePath: string) => Promise<RecentFile[]>;
     checkFileExists: (filePath: string) => Promise<boolean>;
     readLocalFile: (filePath: string) => Promise<string>;
+    readLocalBinaryFile: (filePath: string) => Promise<Buffer>;
     saveColumnMapping: (
       fileName: string,
       mapping: ColumnMapping

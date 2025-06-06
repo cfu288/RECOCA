@@ -1,6 +1,7 @@
 import { ipcMain } from "electron";
 import { getCurrentDataFrame, setCurrentDataFrame } from "./file-handlers";
 import { getPolars, calculateAppointmentDistribution } from "./shared";
+import { isExcelDateSerial, excelDateToJSDate } from "../../core/data/loaders/excel-loader";
 import { filterDataFrameByDateRange } from "../../core/continuity/utils/date-filter";
 import { filterDataFrameByStatus } from "../../core/continuity/utils/status-filter";
 import { calculateUpcIndex } from "../../core/continuity/indices/upc-index";
@@ -12,6 +13,39 @@ interface ValidationResult {
   isValid: boolean;
   status: "valid" | "warning" | "error";
   message?: string;
+}
+
+/**
+ * Determines if a column contains primarily Excel date serial numbers.
+ * Samples the first 100 values for performance on large datasets.
+ * 
+ * @param values - Array of column values to analyze
+ * @returns True if more than 50% of sampled values are Excel dates
+ */
+function containsExcelDates(values: unknown[]): boolean {
+  const sampleSize = Math.min(100, values.length);
+  const sample = values.slice(0, sampleSize);
+  const excelDateCount = sample.filter(val => isExcelDateSerial(val)).length;
+  return excelDateCount > sampleSize * 0.5;
+}
+
+/**
+ * Converts a value to a display-friendly string, handling Excel dates.
+ * 
+ * @param value - Value to convert for display
+ * @returns String representation with Excel dates converted to ISO format
+ */
+function convertValueForDisplay(value: unknown): string {
+  if (value === null || value === undefined) return "null";
+  if (isExcelDateSerial(value)) {
+    try {
+      const jsDate = excelDateToJSDate(value as number);
+      return jsDate.toISOString().split('T')[0];
+    } catch {
+      return String(value);
+    }
+  }
+  return String(value);
 }
 
 function validateColumn(
@@ -157,18 +191,23 @@ export function registerDataHandlers() {
           .select(columnName)
           .getColumn(columnName)
           .toArray();
-        const uniqueValues = Array.from(new Set(allValues))
-          .filter((val) => val !== null)
-          .map((val) => String(val))
+        
+        // Check if column contains Excel dates and convert for display
+        const hasExcelDates = containsExcelDates(allValues);
+        
+        const convertedValues = hasExcelDates 
+          ? allValues.map(convertValueForDisplay)
+          : allValues.map((val: unknown) => val === null ? "null" : String(val));
+          
+        const uniqueValues = Array.from(new Set(convertedValues))
+          .filter((val) => val !== "null")
           .sort();
 
-        const preview = allValues.slice(0, 3);
+        const preview = convertedValues.slice(0, 3);
 
         return {
           success: true,
-          preview: preview.map((val: unknown) =>
-            val === null ? "null" : String(val)
-          ),
+          preview: preview,
           uniqueValues: uniqueValues,
         };
       } catch (error) {
