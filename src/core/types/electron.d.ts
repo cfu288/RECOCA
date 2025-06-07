@@ -34,14 +34,17 @@ interface ColumnMapping {
 
 export interface IElectronAPI {
   handleNewFile: (
-    fileContents: string,
-    fileName: string
+    fileContents: string | ArrayBuffer,
+    fileName: string,
+    selectedSheet?: string
   ) => Promise<{
     success: boolean;
     message: string;
     columns?: string[];
     previews?: Record<string, string[]>;
     filePath?: string;
+    isExcel?: boolean;
+    sheets?: Array<{ name: string; rowCount: number; columnCount: number }>;
   }>;
   returnSelectedColumns: (
     filePath: string,
