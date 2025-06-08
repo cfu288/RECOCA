@@ -9,6 +9,7 @@ import { UploadFileScreen } from "../features/file-upload/components/UploadFileS
 import { ResultsScreen } from "../features/analytics/components/ResultsScreen";
 import { BreadcrumbNav } from "../features/navigation/components/BreadcrumbNav";
 import { ExcelSheet } from "../core/data/loaders/excel-loader";
+import { FileUploadProvider } from "../features/file-upload/contexts/FileUploadContext";
 
 export interface ColumnMapping {
   residentIdentifier: string;
@@ -112,11 +113,12 @@ const App: React.FC = () => {
     switch (screen) {
       case "upload":
         return (
-          <UploadFileScreen
+          <FileUploadProvider 
             onScreenChange={handleScreenChange}
             onProcessingComplete={setProcessingStatus}
-            fileProcessingStatus={processingStatus}
-          />
+          >
+            <UploadFileScreen fileProcessingStatus={processingStatus} />
+          </FileUploadProvider>
         );
       case "column-mapping":
         return (
@@ -137,10 +139,12 @@ const App: React.FC = () => {
         );
       default:
         return (
-          <UploadFileScreen
-            fileProcessingStatus={processingStatus}
+          <FileUploadProvider 
+            onScreenChange={handleScreenChange}
             onProcessingComplete={setProcessingStatus}
-          />
+          >
+            <UploadFileScreen fileProcessingStatus={processingStatus} />
+          </FileUploadProvider>
         );
     }
   };

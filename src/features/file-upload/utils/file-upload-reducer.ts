@@ -13,88 +13,74 @@ export interface FileUploadState {
 }
 
 export type FileUploadAction =
-  | { type: "SET_PROCESSING_STATUS"; payload: ProcessingStatus }
-  | {
-      type: "SET_SHEET_SELECTOR";
-      payload: { show: boolean; sheets?: ExcelSheet[] };
-    }
-  | { type: "SET_PENDING_FILE"; payload: File | null }
-  | { type: "SET_CACHED_CONTENTS"; payload: ArrayBuffer | null }
-  | { type: "START_PROCESSING" }
-  | {
-      type: "COMPLETE_PROCESSING";
-      payload: { status: ProcessingStatus; success: boolean };
-    }
-  | { type: "HANDLE_EXCEL_FILE"; payload: { sheets: ExcelSheet[]; file: File } }
-  | { type: "RESET_FILE_STATE" }
-  | { type: "UPDATE_FROM_PROPS"; payload: ProcessingStatus };
+  | { type: "START" }
+  | { type: "SUCCESS"; payload: ProcessingStatus }
+  | { type: "ERROR"; payload: ProcessingStatus }
+  | { type: "EXCEL_DETECTED"; payload: { sheets: ExcelSheet[]; file: File; buffer: ArrayBuffer } }
+  | { type: "SHEET_SELECTED" }
+  | { type: "RESET" }
+  | { type: "SYNC_STATUS"; payload: ProcessingStatus };
 
 /**
  * Reducer function for managing file upload state transitions
  * Handles all state updates related to file processing, Excel sheet selection,
  * and upload status management
  */
+export const INITIAL_FILE_UPLOAD_STATE: FileUploadState = {
+  processingStatus: { status: "pending" },
+  showSheetSelector: false,
+  excelSheets: [],
+  pendingFile: null,
+  cachedFileContents: null,
+};
+
 export function fileUploadReducer(
   state: FileUploadState,
   action: FileUploadAction
 ): FileUploadState {
-  console.debug('[Reducer]', action.type, {
-    currentStatus: state.processingStatus.status,
-    action,
-  });
-  
   switch (action.type) {
-    case "SET_PROCESSING_STATUS":
-      return { ...state, processingStatus: action.payload };
-
-    case "SET_SHEET_SELECTOR":
-      return {
-        ...state,
-        showSheetSelector: action.payload.show,
-        excelSheets: action.payload.sheets || state.excelSheets,
-      };
-
-    case "SET_PENDING_FILE":
-      return { ...state, pendingFile: action.payload };
-
-    case "SET_CACHED_CONTENTS":
-      return { ...state, cachedFileContents: action.payload };
-
-    case "START_PROCESSING":
+    case "START":
       return { ...state, processingStatus: { status: "processing" } };
 
-    case "COMPLETE_PROCESSING":
+    case "SUCCESS":
       return {
         ...state,
-        processingStatus: action.payload.status,
+        processingStatus: action.payload,
         showSheetSelector: false,
         pendingFile: null,
-        cachedFileContents: action.payload.success
-          ? null
-          : state.cachedFileContents,
+        cachedFileContents: null,
       };
 
-    case "HANDLE_EXCEL_FILE":
+    case "ERROR":
+      return {
+        ...state,
+        processingStatus: action.payload,
+        showSheetSelector: false,
+        // Keep cached contents on error for potential retry
+      };
+
+    case "EXCEL_DETECTED":
       return {
         ...state,
         excelSheets: action.payload.sheets,
         showSheetSelector: true,
         pendingFile: action.payload.file,
+        cachedFileContents: action.payload.buffer,
         processingStatus: { status: "processing" },
       };
 
-    case "RESET_FILE_STATE":
+    case "SHEET_SELECTED":
       return {
-        processingStatus: { status: "pending" },
+        ...state,
         showSheetSelector: false,
-        excelSheets: [],
-        pendingFile: null,
-        cachedFileContents: null,
       };
 
-    case "UPDATE_FROM_PROPS":
+    case "RESET":
+      return INITIAL_FILE_UPLOAD_STATE;
+
+    case "SYNC_STATUS":
+      // Don't override status if we're actively processing
       if (state.processingStatus.status === "processing") {
-        console.debug('[Reducer] Ignoring UPDATE_FROM_PROPS while processing');
         return state;
       }
       return { ...state, processingStatus: action.payload };
