@@ -11,9 +11,6 @@ export interface PreviewSectionProps {
   isDateColumn?: boolean;
 }
 
-/**
- * Formats a value for display, converting Excel date serials if needed
- */
 const formatDisplayValue = (value: string, isDateColumn?: boolean): string => {
   if (!isDateColumn) return value;
 
@@ -21,7 +18,6 @@ const formatDisplayValue = (value: string, isDateColumn?: boolean): string => {
   if (!isNaN(numValue) && isExcelDateSerial(numValue)) {
     try {
       const date = excelDateToJSDate(numValue);
-      // Format as MM/DD/YYYY
       return new Intl.DateTimeFormat("en-US", {
         month: "2-digit",
         day: "2-digit",
@@ -32,7 +28,6 @@ const formatDisplayValue = (value: string, isDateColumn?: boolean): string => {
     }
   }
 
-  // If it's already a date string, try to format it consistently
   const dateObj = new Date(value);
   if (!isNaN(dateObj.getTime())) {
     return new Intl.DateTimeFormat("en-US", {

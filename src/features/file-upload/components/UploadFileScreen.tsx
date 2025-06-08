@@ -13,11 +13,6 @@ import { FileReaderService } from "../services/file-reader-service";
 import { FileProcessor, FileProcessingError } from "../services/file-processor";
 import { useFileUploadContext } from "../contexts/FileUploadContext";
 
-/**
- * Main file upload screen component
- * Handles CSV and Excel file uploads with support for multi-sheet Excel files
- * @param fileProcessingStatus - Initial processing status from parent
- */
 export const UploadFileScreen: React.FC<{
   fileProcessingStatus?: ProcessingStatus;
 }> = ({ fileProcessingStatus = { status: "pending" } }) => {
@@ -47,10 +42,6 @@ export const UploadFileScreen: React.FC<{
 
 
 
-  /**
-   * Main file processing function that orchestrates file reading,
-   * sending to backend, and handling the response
-   */
   const processFile = async (file: File, selectedSheet?: string) => {
     dispatch({ type: "START" });
 
@@ -61,7 +52,6 @@ export const UploadFileScreen: React.FC<{
         cachedFileContents || undefined
       );
 
-      // Handle Excel files with sheet selection
       if (result.isExcel && result.sheets && FileReaderService.isArrayBuffer(fileContents)) {
         dispatch({
           type: "EXCEL_DETECTED",
@@ -70,14 +60,12 @@ export const UploadFileScreen: React.FC<{
         return;
       }
 
-      // Handle success/error
       const status = FileProcessor.createProcessingStatus(result);
       dispatch({
         type: result.success ? "SUCCESS" : "ERROR",
         payload: status,
       });
 
-      // Navigate if successful
       if (result.success && result.columns) {
         onProcessingComplete?.(status);
         onScreenChange?.("column-mapping");
@@ -132,9 +120,6 @@ export const UploadFileScreen: React.FC<{
     dispatch({ type: "RESET" });
   };
 
-  /**
-   * Handles Excel sheet selection from the sheet selector dialog
-   */
   const handleSheetSelect = async (sheetName: string) => {
     dispatch({ type: "SHEET_SELECTED" });
     if (pendingFile) {
@@ -147,9 +132,6 @@ export const UploadFileScreen: React.FC<{
     setActiveFile(null);
   };
 
-  /**
-   * Handles file selection from the recent files list
-   */
   const handleRecentFileSelect = async (file: File) => {
     setActiveFile({
       name: file.name,

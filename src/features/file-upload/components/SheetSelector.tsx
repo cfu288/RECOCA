@@ -4,19 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../../shared/compon
 import { ExcelSheet } from "../../../core/data/loaders/excel-loader";
 
 interface SheetSelectorProps {
-  /** List of available Excel sheets with metadata */
   sheets: ExcelSheet[];
-  /** Callback fired when a sheet is selected */
   onSheetSelect: (sheetName: string) => void;
-  /** Callback fired when the selection is cancelled */
   onCancel: () => void;
 }
 
-/**
- * Component for selecting a sheet from an Excel workbook.
- * Displays sheet metadata including row and column counts to help users
- * choose the appropriate sheet for data analysis.
- */
 export const SheetSelector: React.FC<SheetSelectorProps> = ({
   sheets,
   onSheetSelect,

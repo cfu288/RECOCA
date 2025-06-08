@@ -23,9 +23,6 @@ export function getCurrentDataFrame() {
   return currentDf;
 }
 
-/**
- * Register all file-related IPC handlers
- */
 export function registerFileHandlers() {
   ipcMain.handle("getRecentFiles", () => {
     return loadRecentFiles();

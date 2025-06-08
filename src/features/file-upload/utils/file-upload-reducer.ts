@@ -1,9 +1,6 @@
 import { ProcessingStatus } from "../../../app/app";
 import { ExcelSheet } from "../../../core/data/loaders/excel-loader";
 
-/**
- * State shape for the file upload component
- */
 export interface FileUploadState {
   processingStatus: ProcessingStatus;
   showSheetSelector: boolean;
@@ -21,11 +18,6 @@ export type FileUploadAction =
   | { type: "RESET" }
   | { type: "SYNC_STATUS"; payload: ProcessingStatus };
 
-/**
- * Reducer function for managing file upload state transitions
- * Handles all state updates related to file processing, Excel sheet selection,
- * and upload status management
- */
 export const INITIAL_FILE_UPLOAD_STATE: FileUploadState = {
   processingStatus: { status: "pending" },
   showSheetSelector: false,
@@ -56,7 +48,6 @@ export function fileUploadReducer(
         ...state,
         processingStatus: action.payload,
         showSheetSelector: false,
-        // Keep cached contents on error for potential retry
       };
 
     case "EXCEL_DETECTED":
@@ -79,11 +70,9 @@ export function fileUploadReducer(
       return INITIAL_FILE_UPLOAD_STATE;
 
     case "SYNC_STATUS":
-      // Don't override status if we're actively processing
-      if (state.processingStatus.status === "processing") {
-        return state;
-      }
-      return { ...state, processingStatus: action.payload };
+      return state.processingStatus.status === "processing" 
+        ? state
+        : { ...state, processingStatus: action.payload };
 
     default:
       return state;

@@ -1,6 +1,3 @@
-/**
- * Service for reading file contents with proper typing
- */
 export class FileReaderService {
   static async readAsArrayBuffer(file: File): Promise<ArrayBuffer> {
     return new Promise((resolve, reject) => {

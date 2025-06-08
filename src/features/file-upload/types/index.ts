@@ -1,7 +1,3 @@
-/**
- * Shared types for file upload feature
- */
-
 export interface FileProcessingResult {
   success: boolean;
   message: string;
