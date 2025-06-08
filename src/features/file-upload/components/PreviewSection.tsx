@@ -1,15 +1,55 @@
 import * as React from "react";
+import {
+  isExcelDateSerial,
+  excelDateToJSDate,
+} from "../../../core/data/loaders/excel-loader";
 
 export interface PreviewSectionProps {
   columns: string[];
   previews: Record<string, string[]>;
   title?: string;
+  isDateColumn?: boolean;
 }
+
+/**
+ * Formats a value for display, converting Excel date serials if needed
+ */
+const formatDisplayValue = (value: string, isDateColumn?: boolean): string => {
+  if (!isDateColumn) return value;
+
+  const numValue = Number(value);
+  if (!isNaN(numValue) && isExcelDateSerial(numValue)) {
+    try {
+      const date = excelDateToJSDate(numValue);
+      // Format as MM/DD/YYYY
+      return new Intl.DateTimeFormat("en-US", {
+        month: "2-digit",
+        day: "2-digit",
+        year: "numeric",
+      }).format(date);
+    } catch {
+      return value;
+    }
+  }
+
+  // If it's already a date string, try to format it consistently
+  const dateObj = new Date(value);
+  if (!isNaN(dateObj.getTime())) {
+    return new Intl.DateTimeFormat("en-US", {
+      month: "2-digit",
+      day: "2-digit",
+      year: "numeric",
+    }).format(dateObj);
+  }
+
+  return value;
+};
 
 export const PreviewSection: React.FC<PreviewSectionProps> = ({
   columns,
   previews,
   title,
+  isDateColumn,
 }) => (
   <div className="hidden md:block h-full">
     <div className="w-full border rounded-md px-4 bg-gray-50 pb-4 relative md:h-full md:flex md:flex-col md:justify-center">
@@ -32,7 +72,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
             <div key={column} className="space-y-1 font-mono text-right">
               {previews[column]?.map((value, idx) => (
                 <p key={idx} className="text-sm">
-                  {value}
+                  {formatDisplayValue(value, isDateColumn)}
                 </p>
               ))}
               {previews[column]?.length > 0 && <p className="text-sm">...</p>}

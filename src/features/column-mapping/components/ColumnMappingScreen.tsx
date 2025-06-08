@@ -962,6 +962,7 @@ export const ColumnMappingScreen: React.FC<{
                 columns={[columnMapping.appointmentDate]}
                 previews={processingStatus.previews || {}}
                 title={columnMapping.appointmentDate}
+                isDateColumn={true}
               />
             </div>
           </div>
