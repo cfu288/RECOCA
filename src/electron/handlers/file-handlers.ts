@@ -54,7 +54,15 @@ export function registerFileHandlers() {
 
   ipcMain.handle("readLocalBinaryFile", (_, filePath: string) => {
     try {
-      return fs.readFileSync(filePath);
+      // Add path validation
+      const safePath = path.normalize(filePath);
+      const userDataPath = app.getPath("userData");
+      
+      if (!safePath.startsWith(userDataPath)) {
+        throw new Error("Access denied: Path must be within application data directory");
+      }
+      
+      return fs.readFileSync(safePath);
     } catch (error) {
       console.error("Error reading binary file:", error);
       throw error;
