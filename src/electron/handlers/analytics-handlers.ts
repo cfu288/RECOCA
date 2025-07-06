@@ -1,6 +1,7 @@
 import { ipcMain } from "electron";
 import { getCurrentDataFrame } from "./file-handlers";
 import { getPolars } from "./shared";
+import { convertValueToDateString } from "./utils/date-converter";
 import {
   calculateTopProviders,
   PatientVisitRecord,
@@ -115,7 +116,9 @@ export function registerAnalyticsHandlers() {
 
         const result = calculateTopProviders(patientVisitRecords);
         console.log(
-          `Returning top providers data for ${Object.keys(result).length} patients`
+          `Returning top providers data for ${
+            Object.keys(result).length
+          } patients`
         );
 
         return result;
@@ -193,7 +196,9 @@ export function registerAnalyticsHandlers() {
               patientRecord.middleName = String(record[patientMiddleNameCol]);
             }
             if (patientDateOfBirthCol && record[patientDateOfBirthCol]) {
-              patientRecord.dateOfBirth = String(record[patientDateOfBirthCol]);
+              patientRecord.dateOfBirth = convertValueToDateString(
+                record[patientDateOfBirthCol]
+              );
             }
             if (patientRaceCol && record[patientRaceCol]) {
               patientRecord.race = String(record[patientRaceCol]);
@@ -216,7 +221,11 @@ export function registerAnalyticsHandlers() {
         const result = mapProvidersToPatientsCore(patientRecords);
 
         console.log(
-          `Mapping complete: ${Object.keys(result.providerToPatients).length} providers with ${Object.keys(result.patientToProvider).length} patients assigned`
+          `Mapping complete: ${
+            Object.keys(result.providerToPatients).length
+          } providers with ${
+            Object.keys(result.patientToProvider).length
+          } patients assigned`
         );
 
         return result;

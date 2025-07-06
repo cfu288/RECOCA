@@ -153,7 +153,7 @@ describe("DataFrame Status Filtering", () => {
     filtered = filterDataFrameByStatus(
       testDf,
       "appointmentStatus",
-      null as unknown as string[]
+      (null as unknown) as string[]
     );
     expect(filtered.height).toBe(testDf.height);
   });

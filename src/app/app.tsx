@@ -8,6 +8,8 @@ import { ColumnMappingScreen } from "../features/column-mapping/components/Colum
 import { UploadFileScreen } from "../features/file-upload/components/UploadFileScreen";
 import { ResultsScreen } from "../features/analytics/components/ResultsScreen";
 import { BreadcrumbNav } from "../features/navigation/components/BreadcrumbNav";
+import { ExcelSheet } from "../core/data/loaders/excel-loader";
+import { FileUploadProvider } from "../features/file-upload/contexts/FileUploadContext";
 
 export interface ColumnMapping {
   residentIdentifier: string;
@@ -35,6 +37,8 @@ export interface ProcessingStatus {
   message?: string;
   columns?: string[];
   previews?: Record<string, string[]>;
+  isExcel?: boolean;
+  sheets?: ExcelSheet[];
   statistics?: {
     filtered: {
       uniqueResidents: number;
@@ -75,8 +79,10 @@ export interface ValidationStatusState {
 
 const App: React.FC = () => {
   const [screen, setScreen] = React.useState<Screens>("upload");
-  const [processingStatus, setProcessingStatus] =
-    React.useState<ProcessingStatus>({ status: "pending" });
+  const [
+    processingStatus,
+    setProcessingStatus,
+  ] = React.useState<ProcessingStatus>({ status: "pending" });
   const [columnMapping, setColumnMapping] = React.useState<ColumnMapping>({
     residentIdentifier: "",
     patientIdentifier: [],
@@ -109,11 +115,12 @@ const App: React.FC = () => {
     switch (screen) {
       case "upload":
         return (
-          <UploadFileScreen
+          <FileUploadProvider
             onScreenChange={handleScreenChange}
             onProcessingComplete={setProcessingStatus}
-            fileProcessingStatus={processingStatus}
-          />
+          >
+            <UploadFileScreen fileProcessingStatus={processingStatus} />
+          </FileUploadProvider>
         );
       case "column-mapping":
         return (
@@ -134,10 +141,12 @@ const App: React.FC = () => {
         );
       default:
         return (
-          <UploadFileScreen
-            fileProcessingStatus={processingStatus}
+          <FileUploadProvider
+            onScreenChange={handleScreenChange}
             onProcessingComplete={setProcessingStatus}
-          />
+          >
+            <UploadFileScreen fileProcessingStatus={processingStatus} />
+          </FileUploadProvider>
         );
     }
   };

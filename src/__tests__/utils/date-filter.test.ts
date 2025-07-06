@@ -603,13 +603,22 @@ describe("DataFrame Date Range Filtering", () => {
 
         switch (formatType) {
           case 0: // M/D/YY
-            dateStr = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear().toString().slice(-2)}`;
+            dateStr = `${
+              date.getMonth() + 1
+            }/${date.getDate()}/${date.getFullYear().toString().slice(-2)}`;
             break;
           case 1: // MM/DD/YYYY
-            dateStr = `${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getDate().toString().padStart(2, "0")}/${date.getFullYear()}`;
+            dateStr = `${(date.getMonth() + 1)
+              .toString()
+              .padStart(2, "0")}/${date
+              .getDate()
+              .toString()
+              .padStart(2, "0")}/${date.getFullYear()}`;
             break;
           case 2: // YYYY-MM-DD
-            dateStr = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
+            dateStr = `${date.getFullYear()}-${(date.getMonth() + 1)
+              .toString()
+              .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
             break;
           default:
             dateStr = "1/1/22";

@@ -128,9 +128,8 @@ describe("Filter Integration Tests", () => {
     const expectedStatusCount = testDf
       .getColumn("appointmentStatus")
       .toArray()
-      .filter((status: any) =>
-        ["Completed", "No Show"].includes(status)
-      ).length;
+      .filter((status: any) => ["Completed", "No Show"].includes(status))
+      .length;
     expect(statusFiltered.height).toBe(expectedStatusCount);
 
     // Then apply a date filter for H2 2022 (July-December)
