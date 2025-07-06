@@ -8,6 +8,16 @@ import {
 } from "../../../core/data/loaders/excel-loader";
 import * as XLSX from "xlsx";
 
+jest.mock("xlsx", () => ({
+  read: jest.fn(),
+  utils: {
+    decode_range: jest.fn(),
+    sheet_to_json: jest.fn(),
+  },
+}));
+
+const mockXLSX = XLSX as jest.Mocked<typeof XLSX>;
+
 describe("Excel Loader", () => {
   describe("isExcelFile", () => {
     it("should return true for Excel file extensions", () => {
@@ -116,11 +126,21 @@ describe("Excel Loader", () => {
     };
 
     beforeEach(() => {
-      jest.spyOn(XLSX, "read").mockReturnValue(mockWorkbook as any);
+      mockXLSX.read.mockReturnValue(mockWorkbook as any);
+      // Simple mock that returns the expected range values for our test data
+      mockXLSX.utils.decode_range.mockImplementation((ref) => {
+        const ranges: Record<string, any> = {
+          "A1:C10": { e: { r: 9, c: 2 } },
+          "A1:E5": { e: { r: 4, c: 4 } },
+          "A1:B100": { e: { r: 99, c: 1 } },
+          "A1:A1": { e: { r: 0, c: 0 } },
+        };
+        return ranges[ref] || { e: { r: 0, c: 0 } };
+      });
     });
 
     afterEach(() => {
-      jest.restoreAllMocks();
+      jest.clearAllMocks();
     });
 
     it("should extract sheet information from Excel file", () => {
@@ -159,7 +179,7 @@ describe("Excel Loader", () => {
         },
       };
 
-      jest.spyOn(XLSX, "read").mockReturnValue(emptyWorkbook as any);
+      mockXLSX.read.mockReturnValue(emptyWorkbook as any);
 
       const mockBuffer = Buffer.from("mock");
       const result = getExcelFileInfo(mockBuffer);
@@ -181,7 +201,7 @@ describe("Excel Loader", () => {
         },
       };
 
-      jest.spyOn(XLSX, "read").mockReturnValue(singleCellWorkbook as any);
+      mockXLSX.read.mockReturnValue(singleCellWorkbook as any);
 
       const mockBuffer = Buffer.from("mock");
       const result = getExcelFileInfo(mockBuffer);
@@ -218,17 +238,13 @@ describe("Excel Loader", () => {
       },
     };
 
-    const mockSheetToJson = jest.fn();
-
     beforeEach(() => {
-      jest.spyOn(XLSX, "read").mockReturnValue(mockWorkbook as any);
-      jest
-        .spyOn(XLSX.utils, "sheet_to_json")
-        .mockImplementation(mockSheetToJson);
+      mockXLSX.read.mockReturnValue(mockWorkbook as any);
+      mockXLSX.utils.sheet_to_json.mockClear();
     });
 
     afterEach(() => {
-      jest.restoreAllMocks();
+      jest.clearAllMocks();
     });
 
     it("should convert a specific sheet to JSON", () => {
@@ -237,7 +253,7 @@ describe("Excel Loader", () => {
         { Name: "Jane", Age: 25, Date: 45566 },
       ];
 
-      mockSheetToJson.mockReturnValue(expectedData);
+      mockXLSX.utils.sheet_to_json.mockReturnValue(expectedData);
 
       const mockBuffer = Buffer.from("mock");
       const result = convertSheetToJSON(mockBuffer, "TestSheet");
@@ -246,7 +262,7 @@ describe("Excel Loader", () => {
         type: "buffer",
         cellDates: false,
       });
-      expect(mockSheetToJson).toHaveBeenCalledWith(
+      expect(mockXLSX.utils.sheet_to_json).toHaveBeenCalledWith(
         mockWorkbook.Sheets["TestSheet"]
       );
       expect(result).toEqual(expectedData);
@@ -268,8 +284,8 @@ describe("Excel Loader", () => {
         },
       };
 
-      jest.spyOn(XLSX, "read").mockReturnValue(emptyWorkbook as any);
-      mockSheetToJson.mockReturnValue([]);
+      mockXLSX.read.mockReturnValue(emptyWorkbook as any);
+      mockXLSX.utils.sheet_to_json.mockReturnValue([]);
 
       const mockBuffer = Buffer.from("mock");
       const result = convertSheetToJSON(mockBuffer, "EmptySheet");
@@ -282,7 +298,7 @@ describe("Excel Loader", () => {
         { Text: "Hello", Number: 123, Boolean: true, Date: 45565, Null: null },
       ];
 
-      mockSheetToJson.mockReturnValue(mixedData);
+      mockXLSX.utils.sheet_to_json.mockReturnValue(mixedData);
 
       const mockBuffer = Buffer.from("mock");
       const result = convertSheetToJSON(mockBuffer, "TestSheet");
