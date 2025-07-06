@@ -33,8 +33,10 @@ export const ColumnMappingScreen: React.FC<{
   setColumnMapping,
 }) => {
   const { activeFile, setActiveFile } = useActiveFile();
-  const [processingStatus, setProcessingStatus] =
-    React.useState<ProcessingStatus>(fileProcessingStatus);
+  const [
+    processingStatus,
+    setProcessingStatus,
+  ] = React.useState<ProcessingStatus>(fileProcessingStatus);
   const [uniqueStatusValues, setUniqueStatusValues] = React.useState<string[]>(
     []
   );
@@ -45,12 +47,14 @@ export const ColumnMappingScreen: React.FC<{
     columnMapping.selectedResidents || []
   );
   const [uniqueResidents, setUniqueResidents] = React.useState<string[]>([]);
-  const [validationStatus, setValidationStatus] =
-    React.useState<ValidationState>({
-      residentIdentifier: null,
-      patientIdentifier: null,
-      appointmentDate: null,
-    });
+  const [
+    validationStatus,
+    setValidationStatus,
+  ] = React.useState<ValidationState>({
+    residentIdentifier: null,
+    patientIdentifier: null,
+    appointmentDate: null,
+  });
 
   const [dateRange, setDateRange] = React.useState<{
     start: string;

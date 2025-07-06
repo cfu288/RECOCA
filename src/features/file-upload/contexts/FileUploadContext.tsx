@@ -1,5 +1,5 @@
-import React, { createContext, useContext, ReactNode } from 'react';
-import { ProcessingStatus, Screens } from '../../../app/app';
+import React, { createContext, useContext, ReactNode } from "react";
+import { ProcessingStatus, Screens } from "../../../app/app";
 
 interface FileUploadContextType {
   onScreenChange?: (screen: Screens) => void;
@@ -14,7 +14,9 @@ export const FileUploadProvider: React.FC<{
   onProcessingComplete?: (status: ProcessingStatus) => void;
 }> = ({ children, onScreenChange, onProcessingComplete }) => {
   return (
-    <FileUploadContext.Provider value={{ onScreenChange, onProcessingComplete }}>
+    <FileUploadContext.Provider
+      value={{ onScreenChange, onProcessingComplete }}
+    >
       {children}
     </FileUploadContext.Provider>
   );
@@ -23,7 +25,9 @@ export const FileUploadProvider: React.FC<{
 export const useFileUploadContext = () => {
   const context = useContext(FileUploadContext);
   if (context === undefined) {
-    throw new Error('useFileUploadContext must be used within a FileUploadProvider');
+    throw new Error(
+      "useFileUploadContext must be used within a FileUploadProvider"
+    );
   }
   return context;
 };

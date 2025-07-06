@@ -15,7 +15,10 @@ export const SheetSelectorSkeleton: React.FC = () => {
         </div>
         <div className="px-6 pb-6 space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
+            <div
+              key={i}
+              className="flex items-center justify-between p-3 border rounded-lg"
+            >
               <div className="flex-1 min-w-0">
                 <Skeleton className="h-5 w-48 mb-1" />
                 <Skeleton className="h-4 w-32" />

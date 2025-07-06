@@ -1,6 +1,11 @@
 import * as React from "react";
 import { Button } from "../../../shared/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../../../shared/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../../shared/components/ui/card";
 import { ExcelSheet } from "../../../core/data/loaders/excel-loader";
 
 interface SheetSelectorProps {
@@ -19,7 +24,8 @@ export const SheetSelector: React.FC<SheetSelectorProps> = ({
       <CardHeader>
         <CardTitle>Select Excel Sheet</CardTitle>
         <p className="text-sm text-gray-600">
-          This Excel file contains multiple sheets. Please select which sheet to use:
+          This Excel file contains multiple sheets. Please select which sheet to
+          use:
         </p>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -31,7 +37,8 @@ export const SheetSelector: React.FC<SheetSelectorProps> = ({
             <div className="flex-1 min-w-0">
               <p className="font-medium truncate">{sheet.name}</p>
               <p className="text-sm text-gray-500">
-                {sheet.rowCount.toLocaleString()} rows × {sheet.columnCount.toLocaleString()} columns
+                {sheet.rowCount.toLocaleString()} rows ×{" "}
+                {sheet.columnCount.toLocaleString()} columns
               </p>
             </div>
             <Button

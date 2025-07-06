@@ -102,8 +102,9 @@ export function mapProvidersToPatients(
       );
     }
 
-    const providerVisitCounts =
-      patientToProviderVisitCounts.get(currentPatientId)!;
+    const providerVisitCounts = patientToProviderVisitCounts.get(
+      currentPatientId
+    )!;
     providerVisitCounts.set(
       currentProviderId,
       (providerVisitCounts.get(currentProviderId) || 0) + 1
@@ -212,7 +213,9 @@ export function mapProvidersToPatients(
   };
 
   console.log(
-    `Mapped ${Object.keys(patientIdToAssignedProvider).length} patients to ${performanceMetrics.uniqueProviders} providers (${performanceMetrics.processingTimeMs}ms)`
+    `Mapped ${Object.keys(patientIdToAssignedProvider).length} patients to ${
+      performanceMetrics.uniqueProviders
+    } providers (${performanceMetrics.processingTimeMs}ms)`
   );
 
   return {

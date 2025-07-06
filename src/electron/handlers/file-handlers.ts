@@ -57,11 +57,13 @@ export function registerFileHandlers() {
       // Add path validation
       const safePath = path.normalize(filePath);
       const userDataPath = app.getPath("userData");
-      
+
       if (!safePath.startsWith(userDataPath)) {
-        throw new Error("Access denied: Path must be within application data directory");
+        throw new Error(
+          "Access denied: Path must be within application data directory"
+        );
       }
-      
+
       return fs.readFileSync(safePath);
     } catch (error) {
       console.error("Error reading binary file:", error);
@@ -71,9 +73,13 @@ export function registerFileHandlers() {
 
   ipcMain.handle(
     "handleNewFile",
-    async (_event, fileContents: string | ArrayBuffer, fileName: string, selectedSheet?: string) => {
+    async (
+      _event,
+      fileContents: string | ArrayBuffer,
+      fileName: string,
+      selectedSheet?: string
+    ) => {
       try {
-        
         const tempDir = path.join(app.getPath("userData"), "temp");
         if (!fs.existsSync(tempDir)) {
           fs.mkdirSync(tempDir, { recursive: true });
@@ -85,8 +91,8 @@ export function registerFileHandlers() {
 
         if (isExcelFile(fileName)) {
           const fileBuffer = Buffer.from(fileContents as ArrayBuffer);
-          
-          if (!selectedSheet || selectedSheet.trim() === '') {
+
+          if (!selectedSheet || selectedSheet.trim() === "") {
             const excelInfo = getExcelFileInfo(fileBuffer);
             return {
               success: false,
@@ -98,16 +104,19 @@ export function registerFileHandlers() {
 
           const jsonData = convertSheetToJSON(fileBuffer, selectedSheet);
           df = getPolars().DataFrame(jsonData);
-          
+
           filePath = path.join(tempDir, `file_${timestamp}.xlsx`);
           fs.writeFileSync(filePath, fileBuffer);
         } else {
-          const csvContent = typeof fileContents === 'string' ? fileContents : fileContents.toString();
+          const csvContent =
+            typeof fileContents === "string"
+              ? fileContents
+              : fileContents.toString();
           df = getPolars().readCSV(csvContent, {
             hasHeader: true,
             quoteChar: '"',
           });
-          
+
           filePath = path.join(tempDir, `file_${timestamp}.csv`);
           fs.writeFileSync(filePath, csvContent);
         }

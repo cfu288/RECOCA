@@ -2,7 +2,11 @@ import * as React from "react";
 import { Card, CardContent } from "../../../shared/components/ui/card";
 import { Button } from "../../../shared/components/ui/button";
 import { X } from "lucide-react";
-import { formatFileSize, getStatusColor, getStatusText } from "../utils/file-upload-helpers";
+import {
+  formatFileSize,
+  getStatusColor,
+  getStatusText,
+} from "../utils/file-upload-helpers";
 import { ProcessingStatus } from "../../../app/app";
 
 interface FileUploadCardProps {
@@ -64,15 +68,14 @@ export const FileUploadCard: React.FC<FileUploadCardProps> = ({
                       processingStatus.status
                     )}`}
                   >
-                    {getStatusText(processingStatus.status, processingStatus.message)}
+                    {getStatusText(
+                      processingStatus.status,
+                      processingStatus.message
+                    )}
                   </p>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onFileRemove}
-              >
+              <Button variant="ghost" size="icon" onClick={onFileRemove}>
                 <X className="h-5 w-5" />
               </Button>
             </div>

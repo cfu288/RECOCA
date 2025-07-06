@@ -13,7 +13,10 @@ export type FileUploadAction =
   | { type: "START" }
   | { type: "SUCCESS"; payload: ProcessingStatus }
   | { type: "ERROR"; payload: ProcessingStatus }
-  | { type: "EXCEL_DETECTED"; payload: { sheets: ExcelSheet[]; file: File; buffer: ArrayBuffer } }
+  | {
+      type: "EXCEL_DETECTED";
+      payload: { sheets: ExcelSheet[]; file: File; buffer: ArrayBuffer };
+    }
   | { type: "SHEET_SELECTED" }
   | { type: "RESET" }
   | { type: "SYNC_STATUS"; payload: ProcessingStatus };
@@ -70,7 +73,7 @@ export function fileUploadReducer(
       return INITIAL_FILE_UPLOAD_STATE;
 
     case "SYNC_STATUS":
-      return state.processingStatus.status === "processing" 
+      return state.processingStatus.status === "processing"
         ? state
         : { ...state, processingStatus: action.payload };
 

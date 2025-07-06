@@ -17,7 +17,6 @@ import { calculateCocIndex } from "../../core/continuity/indices/coc-index";
 import { calculateSeconIndex } from "../../core/continuity/indices/secon-index";
 import { calculateMmciIndex } from "../../core/continuity/indices/mmci-index";
 
-
 /**
  * Apply filters to a DataFrame based on column mapping configuration.
  */
@@ -117,7 +116,9 @@ export function registerAnalyticsHandlers() {
 
         const result = calculateTopProviders(patientVisitRecords);
         console.log(
-          `Returning top providers data for ${Object.keys(result).length} patients`
+          `Returning top providers data for ${
+            Object.keys(result).length
+          } patients`
         );
 
         return result;
@@ -195,7 +196,9 @@ export function registerAnalyticsHandlers() {
               patientRecord.middleName = String(record[patientMiddleNameCol]);
             }
             if (patientDateOfBirthCol && record[patientDateOfBirthCol]) {
-              patientRecord.dateOfBirth = convertValueToDateString(record[patientDateOfBirthCol]);
+              patientRecord.dateOfBirth = convertValueToDateString(
+                record[patientDateOfBirthCol]
+              );
             }
             if (patientRaceCol && record[patientRaceCol]) {
               patientRecord.race = String(record[patientRaceCol]);
@@ -218,7 +221,11 @@ export function registerAnalyticsHandlers() {
         const result = mapProvidersToPatientsCore(patientRecords);
 
         console.log(
-          `Mapping complete: ${Object.keys(result.providerToPatients).length} providers with ${Object.keys(result.patientToProvider).length} patients assigned`
+          `Mapping complete: ${
+            Object.keys(result.providerToPatients).length
+          } providers with ${
+            Object.keys(result.patientToProvider).length
+          } patients assigned`
         );
 
         return result;

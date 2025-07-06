@@ -5,8 +5,8 @@ import {
 
 export interface ElectronAPI {
   handleNewFile: (
-    fileContents: string | ArrayBuffer, 
-    fileName: string, 
+    fileContents: string | ArrayBuffer,
+    fileName: string,
     selectedSheet?: string
   ) => Promise<{
     success: boolean;
@@ -47,7 +47,10 @@ export interface ElectronAPI {
     };
     [key: string]: unknown;
   }>;
-  getColumnPreview: (filePath: string, columnName: string) => Promise<{
+  getColumnPreview: (
+    filePath: string,
+    columnName: string
+  ) => Promise<{
     success: boolean;
     message?: string;
     preview?: string[];
@@ -116,8 +119,3 @@ export interface ElectronAPI {
   }>;
 }
 
-declare global {
-  interface Window {
-    electron: ElectronAPI;
-  }
-}

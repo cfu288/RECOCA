@@ -116,8 +116,9 @@ export const StatisticsPanel: React.FC<StatisticsPanelProps> = ({
   const [patientGenderData, setPatientGenderData] = React.useState<
     Array<{ name: string; value: number; fill: string }>
   >([]);
-  const [isRaceCollapsibleOpen, setIsRaceCollapsibleOpen] =
-    React.useState(false);
+  const [isRaceCollapsibleOpen, setIsRaceCollapsibleOpen] = React.useState(
+    false
+  );
 
   const updateDemographicData = () => {
     if (!demographicData) {

@@ -79,8 +79,10 @@ export interface ValidationStatusState {
 
 const App: React.FC = () => {
   const [screen, setScreen] = React.useState<Screens>("upload");
-  const [processingStatus, setProcessingStatus] =
-    React.useState<ProcessingStatus>({ status: "pending" });
+  const [
+    processingStatus,
+    setProcessingStatus,
+  ] = React.useState<ProcessingStatus>({ status: "pending" });
   const [columnMapping, setColumnMapping] = React.useState<ColumnMapping>({
     residentIdentifier: "",
     patientIdentifier: [],
@@ -113,7 +115,7 @@ const App: React.FC = () => {
     switch (screen) {
       case "upload":
         return (
-          <FileUploadProvider 
+          <FileUploadProvider
             onScreenChange={handleScreenChange}
             onProcessingComplete={setProcessingStatus}
           >
@@ -139,7 +141,7 @@ const App: React.FC = () => {
         );
       default:
         return (
-          <FileUploadProvider 
+          <FileUploadProvider
             onScreenChange={handleScreenChange}
             onProcessingComplete={setProcessingStatus}
           >

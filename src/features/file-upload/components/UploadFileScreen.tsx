@@ -7,7 +7,10 @@ import { FileUploadHeader } from "./FileUploadHeader";
 import { SheetSelectorSkeleton } from "./SheetSelectorSkeleton";
 import { ProcessingStatus } from "../../../app/app";
 import { isExcelFile } from "../../../core/data/loaders/excel-loader";
-import { fileUploadReducer, INITIAL_FILE_UPLOAD_STATE } from "../utils/file-upload-reducer";
+import {
+  fileUploadReducer,
+  INITIAL_FILE_UPLOAD_STATE,
+} from "../utils/file-upload-reducer";
 import { isValidFileType } from "../utils/file-upload-helpers";
 import { FileReaderService } from "../services/file-reader-service";
 import { FileProcessor, FileProcessingError } from "../services/file-processor";
@@ -32,15 +35,10 @@ export const UploadFileScreen: React.FC<{
     pendingFile,
     cachedFileContents,
   } = state;
-  
 
   React.useEffect(() => {
     dispatch({ type: "SYNC_STATUS", payload: fileProcessingStatus });
   }, [fileProcessingStatus]);
-
-
-
-
 
   const processFile = async (file: File, selectedSheet?: string) => {
     dispatch({ type: "START" });
@@ -52,7 +50,11 @@ export const UploadFileScreen: React.FC<{
         cachedFileContents || undefined
       );
 
-      if (result.isExcel && result.sheets && FileReaderService.isArrayBuffer(fileContents)) {
+      if (
+        result.isExcel &&
+        result.sheets &&
+        FileReaderService.isArrayBuffer(fileContents)
+      ) {
         dispatch({
           type: "EXCEL_DETECTED",
           payload: { sheets: result.sheets, file, buffer: fileContents },
@@ -71,19 +73,20 @@ export const UploadFileScreen: React.FC<{
         onScreenChange?.("column-mapping");
       }
     } catch (error) {
-      const processingError = error instanceof FileProcessingError 
-        ? error 
-        : new FileProcessingError(
-            'An unexpected error occurred',
-            'UNKNOWN_ERROR',
-            error
-          );
-      
+      const processingError =
+        error instanceof FileProcessingError
+          ? error
+          : new FileProcessingError(
+              "An unexpected error occurred",
+              "UNKNOWN_ERROR",
+              error
+            );
+
       const status = FileProcessor.createProcessingStatus(
         { success: false, message: processingError.message },
         processingError
       );
-      
+
       dispatch({ type: "ERROR", payload: status });
     }
   };
@@ -99,7 +102,7 @@ export const UploadFileScreen: React.FC<{
     if (!files || files.length === 0) return;
 
     const file = files[0];
-    
+
     if (isValidFileType(file)) {
       setActiveFile({
         name: file.name,
@@ -138,15 +141,14 @@ export const UploadFileScreen: React.FC<{
       file: file,
       size: file.size,
     });
-    
+
     await processFile(file);
   };
-
 
   return (
     <div className="space-y-8">
       <FileUploadHeader />
-      
+
       <FileUploadCard
         activeFile={activeFile}
         processingStatus={processingStatus}
@@ -156,9 +158,10 @@ export const UploadFileScreen: React.FC<{
         onFileInputChange={handleFileInputChange}
       />
 
-      {processingStatus.status === "processing" && activeFile && isExcelFile(activeFile.name) && !showSheetSelector && (
-        <SheetSelectorSkeleton />
-      )}
+      {processingStatus.status === "processing" &&
+        activeFile &&
+        isExcelFile(activeFile.name) &&
+        !showSheetSelector && <SheetSelectorSkeleton />}
 
       {showSheetSelector && (
         <SheetSelector

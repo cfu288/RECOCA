@@ -4,3 +4,11 @@ declare interface File {
    */
   readonly path: string;
 }
+
+import type { ElectronAPI } from "../../core/types/index";
+
+declare global {
+  interface Window {
+    electron: ElectronAPI;
+  }
+}
