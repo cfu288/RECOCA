@@ -34,40 +34,43 @@ describe("formatFileSize", () => {
 });
 
 describe("isValidFileType", () => {
+  // Mock File objects for Node.js environment
+  const createMockFile = (name: string, type: string) => ({
+    name,
+    type,
+  } as File);
+
   it("should accept CSV files", () => {
-    const csvFile = new File([""], "test.csv", { type: "text/csv" });
+    const csvFile = createMockFile("test.csv", "text/csv");
     expect(isValidFileType(csvFile)).toBe(true);
   });
 
   it("should accept CSV files by extension even with wrong mime type", () => {
-    const csvFile = new File([""], "test.csv", {
-      type: "application/octet-stream",
-    });
+    const csvFile = createMockFile("test.csv", "application/octet-stream");
     expect(isValidFileType(csvFile)).toBe(true);
   });
 
   it("should accept Excel files (.xlsx)", () => {
-    const xlsxFile = new File([""], "test.xlsx", {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
+    const xlsxFile = createMockFile(
+      "test.xlsx",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
     expect(isValidFileType(xlsxFile)).toBe(true);
   });
 
   it("should accept Excel files (.xls)", () => {
-    const xlsFile = new File([""], "test.xls", {
-      type: "application/vnd.ms-excel",
-    });
+    const xlsFile = createMockFile("test.xls", "application/vnd.ms-excel");
     expect(isValidFileType(xlsFile)).toBe(true);
   });
 
   it("should accept files with uppercase extensions", () => {
-    const upperFile = new File([""], "TEST.CSV", { type: "text/csv" });
+    const upperFile = createMockFile("TEST.CSV", "text/csv");
     expect(isValidFileType(upperFile)).toBe(true);
   });
 
   it("should reject invalid file types", () => {
-    const txtFile = new File([""], "test.txt", { type: "text/plain" });
-    const pdfFile = new File([""], "test.pdf", { type: "application/pdf" });
+    const txtFile = createMockFile("test.txt", "text/plain");
+    const pdfFile = createMockFile("test.pdf", "application/pdf");
 
     expect(isValidFileType(txtFile)).toBe(false);
     expect(isValidFileType(pdfFile)).toBe(false);
