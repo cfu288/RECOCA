@@ -78,7 +78,6 @@ class PathManipulationStrategy implements LoadingStrategy {
     const modulePatterns = [
       `nodejs-polars`,
       `nodejs-polars-${platform}-${arch}`,
-      "nodejs-polars-darwin-arm64",
     ];
 
     const possiblePaths = [];
