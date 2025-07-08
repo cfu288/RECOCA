@@ -137,6 +137,7 @@ const App: React.FC = () => {
           <ResultsScreen
             processingStatus={processingStatus}
             onScreenChange={handleScreenChange}
+            columnMapping={columnMapping}
           />
         );
       default:

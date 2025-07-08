@@ -16,6 +16,7 @@ import {
   Legend,
 } from "recharts";
 import { CHART_COLORS } from "../../../core/data/processors/provider-patient-demographics";
+import { ColumnMapping } from "../../../app/app";
 import {
   Collapsible,
   CollapsibleContent,
@@ -56,11 +57,13 @@ interface DemographicData {
 interface StatisticsPanelProps {
   statistics: ProcessingStatistics;
   demographicData?: DemographicData;
+  columnMapping?: ColumnMapping;
 }
 
 export const StatisticsPanel: React.FC<StatisticsPanelProps> = ({
   statistics,
   demographicData,
+  columnMapping,
 }) => {
   const toTileCase = (fieldName: string) => {
     return fieldName
@@ -282,12 +285,18 @@ export const StatisticsPanel: React.FC<StatisticsPanelProps> = ({
       </div>
 
       {/* Patient Demographics */}
-      <div className="grid grid-cols-2 gap-4">
-        <Card className="flex flex-col">
-          <CardHeader className="pb-0">
-            <CardTitle className="text-lg">Patient Race Distribution</CardTitle>
-            <CardDescription>Distribution of patients by race</CardDescription>
-          </CardHeader>
+      {(columnMapping?.patientRace || columnMapping?.patientGender) && (
+        <div className={`grid gap-4 ${
+          columnMapping?.patientRace && columnMapping?.patientGender
+            ? "grid-cols-2"
+            : "grid-cols-1"
+        }`}>
+          {columnMapping?.patientRace && (
+          <Card className="flex flex-col">
+            <CardHeader className="pb-0">
+              <CardTitle className="text-lg">Patient Race Distribution</CardTitle>
+              <CardDescription>Distribution of patients by race</CardDescription>
+            </CardHeader>
           <CardContent className="flex-1 pb-0">
             <div className="overflow-x-auto">
               {patientRaceData.length === 0 ? (
@@ -394,13 +403,15 @@ export const StatisticsPanel: React.FC<StatisticsPanelProps> = ({
               )}
             </div>
           </CardContent>
-        </Card>
+          </Card>
+        )}
 
-        <Card className="flex flex-col">
-          <CardHeader className="items-center pb-0">
-            <CardTitle className="text-lg">
-              Patient Gender Distribution
-            </CardTitle>
+        {columnMapping?.patientGender && (
+          <Card className="flex flex-col">
+            <CardHeader className="items-center pb-0">
+              <CardTitle className="text-lg">
+                Patient Gender Distribution
+              </CardTitle>
             <CardDescription>
               Distribution of patients by gender
             </CardDescription>
@@ -456,8 +467,10 @@ export const StatisticsPanel: React.FC<StatisticsPanelProps> = ({
               </ResponsiveContainer>
             </div>
           </CardContent>
-        </Card>
-      </div>
+          </Card>
+        )}
+        </div>
+      )}
 
       <Card>
         <CardHeader>

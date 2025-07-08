@@ -12,7 +12,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "../../../shared/components/ui/tabs";
-import { ProcessingStatus, Screens } from "../../../app/app";
+import { ProcessingStatus, Screens, ColumnMapping } from "../../../app/app";
 import { useActiveFile } from "../../../shared/providers/ActiveFileProvider";
 import { StatisticsPanel } from "./StatisticsPanel";
 import { TopProviders } from "./TopProviders";
@@ -22,6 +22,7 @@ import { extractPatientDemographics } from "../../../core/data/processors/provid
 interface ResultsScreenProps {
   processingStatus: ProcessingStatus;
   onScreenChange?: (screen: Screens) => void;
+  columnMapping?: ColumnMapping;
 }
 
 interface PatientInfo {
@@ -36,6 +37,7 @@ interface PatientInfo {
 
 export const ResultsScreen: React.FC<ResultsScreenProps> = ({
   processingStatus,
+  columnMapping,
 }) => {
   const { activeFile } = useActiveFile();
   const [patientSearchTerm, setPatientSearchTerm] = React.useState("");
@@ -234,6 +236,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
               <StatisticsPanel
                 statistics={processingStatus.statistics}
                 demographicData={demographicData}
+                columnMapping={columnMapping}
               />
             </TabsContent>
 
