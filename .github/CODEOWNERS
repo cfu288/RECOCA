@@ -1,0 +1,16 @@
+# CODEOWNERS file
+
+# This file defines who is responsible for code in this repository.
+
+# These users/teams will be automatically requested for review when someone opens a pull request.
+
+* @cfu288
+
+# Protect GitHub Actions workflows from unauthorized changes
+/.github/workflows/ @cfu288
+/.github/ @cfu288
+
+# Protect build config and packages
+/forge.config.ts @cfu288
+/package.json @cfu288
+/package-lock.json @cfu288
