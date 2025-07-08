@@ -16,11 +16,6 @@ const config: ForgeConfig = {
         "**/node_modules/{nodejs-polars,nodejs-polars-*}/**/*.{node,so,dll}",
     },
     icon: "src/assets/icon",
-    extraResource: [
-      // Include only the nodejs-polars modules that actually exist
-      "node_modules/nodejs-polars",
-      "node_modules/nodejs-polars-darwin-arm64",
-    ],
     // Code signing configuration for macOS
     osxSign: {
       optionsForFile: () => {
@@ -96,8 +91,7 @@ const config: ForgeConfig = {
   ],
   plugins: [
     new AutoUnpackNativesPlugin({
-      // Configure for nodejs-polars - only include modules that exist
-      modules: ["nodejs-polars", "nodejs-polars-darwin-arm64"],
+      modules: ["nodejs-polars"],
     }),
     new VitePlugin({
       build: [
