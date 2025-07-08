@@ -21,6 +21,19 @@ const config: ForgeConfig = {
       "node_modules/nodejs-polars",
       "node_modules/nodejs-polars-darwin-arm64",
     ],
+    // Code signing configuration for macOS
+    osxSign: {
+      optionsForFile: () => {
+        return {
+          entitlements: "./entitlements.plist",
+        };
+      },
+    },
+    osxNotarize: {
+      appleId: process.env.APPLE_ID!,
+      appleIdPassword: process.env.APPLE_PASSWORD!, // This should be an app-specific password
+      teamId: process.env.APPLE_TEAM_ID!,
+    },
     // Define specific patterns to exclude from the package
     ignore: [
       // Exclude source files (they are compiled into .vite)
