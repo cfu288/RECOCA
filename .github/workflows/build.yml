@@ -202,7 +202,7 @@ jobs:
         with:
           tag_name: v${{ steps.package-version.outputs.version }}
           name: Release v${{ steps.package-version.outputs.version }}
-          draft: false
+          draft: true
           prerelease: false
           files: |
             dist/**/*
