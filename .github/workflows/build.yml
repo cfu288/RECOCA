@@ -1,4 +1,4 @@
-name: Build Cross-Platform Executables
+name: Test and Build Cross-Platform Executables
 
 on:
   push:
@@ -40,6 +40,7 @@ jobs:
     needs: test
     permissions:
       contents: read # Only read access for builds
+    if: github.event_name != 'pull_request'
 
     strategy:
       matrix:
@@ -71,7 +72,7 @@ jobs:
         run: npm ci
 
       - name: Import Code Signing Certificates
-        if: matrix.os == 'macos-latest' && github.event_name != 'pull_request'
+        if: matrix.os == 'macos-latest'
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
@@ -95,26 +96,15 @@ jobs:
           # Set key partition list (allows codesign to access the certificate)
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$APPLE_CERTIFICATE_PASSWORD" $KEYCHAIN_PATH
 
-      # Generate signed builds for release (if not a PR)
       - name: Build for macOS (both Intel and ARM)
-        if: matrix.os == 'macos-latest' && github.event_name != 'pull_request'
+        if: matrix.os == 'macos-latest'
         env:
-          # Code signing environment variables (optional)
+          # Code signing environment variables
           # APPLE_PASSWORD should be an app-specific password, not your Apple ID password
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
-          # Build for Intel (x64)
-          npm run make -- --arch=x64
-          # Build for ARM (arm64) 
-          npm run make -- --arch=arm64
-
-      # Generate unsigned builds to make sure still builds on PRs
-      - name: Build for macOS (both Intel and ARM) - Unsigned
-        if: matrix.os == 'macos-latest' && github.event_name == 'pull_request'
-        run: |
-          echo "Building unsigned macOS binaries for PR validation"
           # Build for Intel (x64)
           npm run make -- --arch=x64
           # Build for ARM (arm64) 
