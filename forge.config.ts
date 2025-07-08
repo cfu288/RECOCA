@@ -16,19 +16,25 @@ const config: ForgeConfig = {
         "**/node_modules/{nodejs-polars,nodejs-polars-*}/**/*.{node,so,dll}",
     },
     icon: "src/assets/icon",
-    // Code signing configuration for macOS
-    osxSign: {
-      optionsForFile: () => {
-        return {
-          entitlements: "./entitlements.plist",
-        };
-      },
-    },
-    osxNotarize: {
-      appleId: process.env.APPLE_ID!,
-      appleIdPassword: process.env.APPLE_PASSWORD!, // This should be an app-specific password
-      teamId: process.env.APPLE_TEAM_ID!,
-    },
+    osxSign: process.env.APPLE_CERTIFICATE
+      ? {
+          optionsForFile: () => {
+            return {
+              entitlements: "./entitlements.plist",
+            };
+          },
+        }
+      : undefined,
+    osxNotarize:
+      process.env.APPLE_ID &&
+      process.env.APPLE_PASSWORD &&
+      process.env.APPLE_TEAM_ID
+        ? {
+            appleId: process.env.APPLE_ID,
+            appleIdPassword: process.env.APPLE_PASSWORD, // This should be an app-specific password
+            teamId: process.env.APPLE_TEAM_ID,
+          }
+        : undefined,
     // Define specific patterns to exclude from the package
     ignore: [
       // Exclude source files (they are compiled into .vite)
