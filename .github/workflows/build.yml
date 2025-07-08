@@ -39,7 +39,7 @@ jobs:
   build:
     needs: test
     permissions:
-      contents: read # Only read access for builds
+      contents: write
     if: github.event_name != 'pull_request'
 
     strategy:
@@ -81,6 +81,13 @@ jobs:
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
+          # Debug: Check if certificate exists
+          if [ -z "$APPLE_CERTIFICATE" ]; then
+            echo "Warning: APPLE_CERTIFICATE secret is empty"
+          else
+            echo "APPLE_CERTIFICATE secret is present"
+          fi
+
           # Import certificate from secrets
           echo -n "$APPLE_CERTIFICATE" | base64 --decode -o $CERTIFICATE_PATH
 
@@ -95,6 +102,10 @@ jobs:
 
           # Set key partition list (allows codesign to access the certificate)
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$APPLE_CERTIFICATE_PASSWORD" $KEYCHAIN_PATH
+
+          # Debug: List certificates
+          echo "Certificates in keychain:"
+          security find-identity -v -p codesigning $KEYCHAIN_PATH
 
       - name: Build for macOS (both Intel and ARM)
         if: matrix.os == 'macos-latest'

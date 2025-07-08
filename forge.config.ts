@@ -16,15 +16,13 @@ const config: ForgeConfig = {
         "**/node_modules/{nodejs-polars,nodejs-polars-*}/**/*.{node,so,dll}",
     },
     icon: "src/assets/icon",
-    osxSign: process.env.APPLE_CERTIFICATE
-      ? {
-          optionsForFile: () => {
-            return {
-              entitlements: "./entitlements.plist",
-            };
-          },
-        }
-      : undefined,
+    osxSign: {
+      optionsForFile: () => {
+        return {
+          entitlements: "./entitlements.plist",
+        };
+      },
+    },
     osxNotarize:
       process.env.APPLE_ID &&
       process.env.APPLE_PASSWORD &&
