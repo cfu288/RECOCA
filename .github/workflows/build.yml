@@ -96,7 +96,7 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$APPLE_CERTIFICATE_PASSWORD" $KEYCHAIN_PATH
 
       - name: Build for macOS (both Intel and ARM)
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-latest' && github.event_name != 'pull_request'
         env:
           # Code signing environment variables (optional)
           # APPLE_PASSWORD should be an app-specific password, not your Apple ID password
@@ -104,6 +104,15 @@ jobs:
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
+          # Build for Intel (x64)
+          npm run make -- --arch=x64
+          # Build for ARM (arm64) 
+          npm run make -- --arch=arm64
+
+      - name: Build for macOS (both Intel and ARM) - Unsigned
+        if: matrix.os == 'macos-latest' && github.event_name == 'pull_request'
+        run: |
+          echo "Building unsigned macOS binaries for PR validation"
           # Build for Intel (x64)
           npm run make -- --arch=x64
           # Build for ARM (arm64) 
