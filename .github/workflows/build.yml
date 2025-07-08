@@ -39,8 +39,8 @@ jobs:
   build:
     needs: test
     permissions:
-      contents: read  # Only read access for builds
-    
+      contents: read # Only read access for builds
+
     strategy:
       matrix:
         os: [macos-latest, windows-latest] #, ubuntu-latest]
@@ -95,6 +95,7 @@ jobs:
           # Set key partition list (allows codesign to access the certificate)
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$APPLE_CERTIFICATE_PASSWORD" $KEYCHAIN_PATH
 
+      # Generate signed builds for release (if not a PR)
       - name: Build for macOS (both Intel and ARM)
         if: matrix.os == 'macos-latest' && github.event_name != 'pull_request'
         env:
@@ -109,6 +110,7 @@ jobs:
           # Build for ARM (arm64) 
           npm run make -- --arch=arm64
 
+      # Generate unsigned builds to make sure still builds on PRs
       - name: Build for macOS (both Intel and ARM) - Unsigned
         if: matrix.os == 'macos-latest' && github.event_name == 'pull_request'
         run: |
@@ -172,9 +174,9 @@ jobs:
   create-release:
     needs: build
     permissions:
-      contents: write  # Write access needed to create releases
-    
-    environment: production  # Requires manual approval
+      contents: write # Write access needed to create releases
+
+    environment: production # Requires manual approval
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
