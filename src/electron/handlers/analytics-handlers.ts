@@ -91,7 +91,6 @@ export function registerAnalyticsHandlers() {
         const dfToUse = applyFilters(currentDf, columnMapping);
         const records = dfToUse.toRecords();
 
-
         const patientVisitRecords: PatientVisitRecord[] = records
           .map((record: any) => {
             if (record[patientIdCol] == null || record[providerIdCol] == null) {
@@ -106,7 +105,6 @@ export function registerAnalyticsHandlers() {
             (record: PatientVisitRecord | null): record is PatientVisitRecord =>
               record !== null
           );
-
 
         const result = calculateTopProviders(patientVisitRecords);
 
@@ -158,7 +156,6 @@ export function registerAnalyticsHandlers() {
         const dfToUse = applyFilters(currentDf, columnMapping);
         const records = dfToUse.toRecords();
 
-
         // Convert records to the format expected by the core algorithm
         const patientRecords: PatientRecord[] = records
           .map((record: any) => {
@@ -200,9 +197,7 @@ export function registerAnalyticsHandlers() {
               record !== null
           );
 
-
         const result = mapProvidersToPatientsCore(patientRecords);
-
 
         return result;
       } catch (error) {
@@ -249,16 +244,20 @@ export function registerAnalyticsHandlers() {
           patientColumns
         );
         // SECON requires a date column for chronological ordering
+        const seconResult = columnMapping?.appointmentDate
+          ? calculateSeconIndex(
+              dfToUse,
+              providerColumn,
+              patientColumns,
+              columnMapping.appointmentDate
+            )
+          : { averageSecon: undefined, patientSeconScores: {} };
+
         if (!columnMapping?.appointmentDate) {
-          throw new Error("Date column is required for SECON index calculation");
+          console.warn(
+            "Date column not provided - SECON index calculation skipped"
+          );
         }
-        
-        const seconResult = calculateSeconIndex(
-          dfToUse,
-          providerColumn,
-          patientColumns,
-          columnMapping.appointmentDate
-        );
         const mmciResult = calculateMmciIndex(
           dfToUse,
           providerColumn,
