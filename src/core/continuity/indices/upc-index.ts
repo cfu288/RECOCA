@@ -32,64 +32,104 @@ export function calculateUpcIndex(
       };
     }
 
-    const patientMap = new Map<string, string[]>();
-    const records = df.toRecords();
-
-    records.forEach((row: Record<string, string>) => {
-      const patientValues = patientIdentifierColumns.map(
-        (col) => row[col] || ""
+    if (!df.columns.includes(providerColumn)) {
+      console.error(
+        `Provider column '${providerColumn}' not found in DataFrame.`
       );
-      const compositePatientId = patientValues.join("|");
+      return {
+        averageUpc: undefined,
+        patientUpcScores: {},
+      };
+    }
 
-      const provider = row[providerColumn];
-      if (provider) {
-        if (!patientMap.has(compositePatientId)) {
-          patientMap.set(compositePatientId, []);
-        }
-        patientMap.get(compositePatientId)!.push(provider);
-      }
-    });
+    const missingColumns = patientIdentifierColumns.filter(
+      (col) => !df.columns.includes(col)
+    );
+    if (missingColumns.length > 0) {
+      console.error(
+        `Patient identifier column(s) not found: ${missingColumns.join(", ")}`
+      );
+      return {
+        averageUpc: undefined,
+        patientUpcScores: {},
+      };
+    }
 
-    if (patientMap.size === 0) {
+    const validProviders = df.filter(
+      pl
+        .col(providerColumn)
+        .isNotNull()
+        .and(pl.col(providerColumn).neq(pl.lit("")))
+    );
+    
+    if (validProviders.height === 0) {
       return {
         averageUpc: 0,
         patientUpcScores: {},
       };
     }
 
-    let totalUpcSum = 0;
-    let patientCount = 0;
-    const patientUpcScores: PatientContinuityScores = {};
-
-    for (const [patientId, providers] of patientMap.entries()) {
-      if (providers.length === 0) {
-        continue;
-      }
-
-      if (providers.length === 1) {
-        continue;
-      }
-
-      const totalVisits = providers.length;
-      const providerCounts = new Map<string, number>();
-
-      for (const provider of providers) {
-        providerCounts.set(provider, (providerCounts.get(provider) || 0) + 1);
-      }
-
-      const maxVisitsToSingleProvider = Math.max(
-        ...Array.from(providerCounts.values())
-      );
-
-      const patientUpc = maxVisitsToSingleProvider / totalVisits;
-      patientUpcScores[patientId] = patientUpc;
-      totalUpcSum += patientUpc;
-      patientCount++;
+    let workingDf = validProviders;
+    let patientIdCol = "patient_id";
+    
+    if (patientIdentifierColumns.length > 1) {
+      // Concatenate patient identifier columns with | separator
+      const concatExpr = patientIdentifierColumns
+        .map(col => pl.col(col).fillNull("").cast(pl.Utf8))
+        .reduce((acc, col) => acc.add(pl.lit("|")).add(col));
+      
+      workingDf = workingDf.withColumn(concatExpr.alias(patientIdCol));
+    } else {
+      patientIdCol = patientIdentifierColumns[0];
     }
 
-    // Calculate average UPC across all patients (excluding those with only one visit)
-    const averageUpc =
-      patientCount > 0 ? totalUpcSum / patientCount : undefined;
+    const patientProviderCounts = workingDf
+      .groupBy([patientIdCol, providerColumn])
+      .agg(
+        pl.len().alias("visit_count")
+      );
+
+    const countCol = "visit_count";
+    
+    const patientTotalVisits = patientProviderCounts
+      .groupBy(patientIdCol)
+      .agg(
+        pl.col(countCol).sum().alias("total_visits"),
+        pl.col(countCol).max().alias("max_provider_visits")
+      );
+
+    const eligiblePatients = patientTotalVisits
+      .filter(pl.col("total_visits").gt(1));
+
+    if (eligiblePatients.height === 0) {
+      return {
+        averageUpc: undefined,
+        patientUpcScores: {},
+      };
+    }
+
+    const upcScores = eligiblePatients
+      .withColumn(
+        pl.col("max_provider_visits")
+          .cast(pl.Float64)
+          .div(pl.col("total_visits").cast(pl.Float64))
+          .alias("upc_score")
+      )
+      .select([patientIdCol, "upc_score"]);
+
+    const patientUpcScores: PatientContinuityScores = {};
+    const scoresRecords = upcScores.toRecords();
+    
+    scoresRecords.forEach((row) => {
+      const patientId = row[patientIdCol] as string;
+      const upcScore = row.upc_score as number;
+      if (patientId && typeof upcScore === "number") {
+        patientUpcScores[patientId] = upcScore;
+      }
+    });
+
+    const avgUpcDf = upcScores.select(pl.col("upc_score").mean());
+    const averageUpc = avgUpcDf.getColumn("upc_score").get(0) as number;
 
     return {
       averageUpc,

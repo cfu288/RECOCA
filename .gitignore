@@ -90,3 +90,6 @@ typings/
 
 # Electron-Forge
 out/
+
+# Documentation repos
+docs/nodejs-polars/

@@ -324,4 +324,57 @@ describe("UPC Index Calculation", () => {
     expect(result.patientUpcScores["Patient-李王"]).toBe(1.0); // 2/2
     expect(result.patientUpcScores["Patient-Müller"]).toBe(0.75); // 3/4
   });
+
+  test("should treat empty strings and nulls consistently", () => {
+    const df = pl.DataFrame({
+      patientId: ["P1", "P1", "P1", "P1", "P2", "P2", "P2", "P2"],
+      provider: ["A", "", null, "B", "C", undefined, "", "C"],
+    });
+
+    // Both empty strings and null/undefined should be filtered out
+    // P1: A, B (2 valid visits) -> UPC = 1/2 = 0.5
+    // P2: C, C (2 valid visits) -> UPC = 2/2 = 1.0
+    // Average = (0.5 + 1.0) / 2 = 0.75
+    const upcResult = calculateUpcIndex(df, "provider", ["patientId"]);
+    expect(upcResult.averageUpc).toBeCloseTo(0.75);
+  });
+
+  test("should handle invalid provider column gracefully", () => {
+    const df = pl.DataFrame({
+      patientId: ["P1", "P1", "P1"],
+      provider: ["A", "A", "B"],
+    });
+
+    const result = calculateUpcIndex(df, "nonExistentColumn", ["patientId"]);
+    expect(result.averageUpc).toBeUndefined();
+    expect(Object.keys(result.patientUpcScores).length).toBe(0);
+  });
+
+  test("should handle invalid patient identifier column gracefully", () => {
+    const df = pl.DataFrame({
+      patientId: ["P1", "P1", "P1"],
+      provider: ["A", "A", "B"],
+    });
+
+    const result = calculateUpcIndex(df, "provider", ["nonExistentColumn"]);
+    expect(result.averageUpc).toBeUndefined();
+    expect(Object.keys(result.patientUpcScores).length).toBe(0);
+  });
+
+  test("should handle partially missing patient identifier columns", () => {
+    const df = pl.DataFrame({
+      patientId: ["P1", "P1", "P1"],
+      lastName: ["Smith", "Smith", "Smith"],
+      provider: ["A", "A", "B"],
+    });
+
+    // When one of multiple patient ID columns doesn't exist
+    const result = calculateUpcIndex(df, "provider", [
+      "patientId",
+      "lastName",
+      "nonExistentColumn",
+    ]);
+    expect(result.averageUpc).toBeUndefined();
+    expect(Object.keys(result.patientUpcScores).length).toBe(0);
+  });
 });

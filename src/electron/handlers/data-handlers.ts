@@ -285,14 +285,10 @@ export function registerDataHandlers() {
         let currentDf = getCurrentDataFrame();
 
         if (!currentDf) {
-          console.log("No DataFrame available, attempting to read from file");
           if (filePath) {
             try {
               currentDf = getPolars().readCSV(filePath);
               setCurrentDataFrame(currentDf);
-              console.log(
-                `Successfully read ${currentDf.height} rows from ${filePath}`
-              );
             } catch (error) {
               console.error("Error reading CSV file:", error);
               throw new Error("Failed to read data file");
@@ -329,7 +325,8 @@ export function registerDataHandlers() {
         const totalSeconResult = calculateSeconIndex(
           currentDf,
           columnMapping.residentIdentifier,
-          columnMapping.patientIdentifier
+          columnMapping.patientIdentifier,
+          columnMapping.appointmentDate
         );
 
         const totalMmciResult = calculateMmciIndex(
@@ -406,7 +403,8 @@ export function registerDataHandlers() {
         const filteredSeconResult = calculateSeconIndex(
           filteredDf,
           columnMapping.residentIdentifier,
-          columnMapping.patientIdentifier
+          columnMapping.patientIdentifier,
+          columnMapping.appointmentDate
         );
 
         const filteredMmciResult = calculateMmciIndex(

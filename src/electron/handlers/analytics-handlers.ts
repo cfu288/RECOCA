@@ -91,9 +91,6 @@ export function registerAnalyticsHandlers() {
         const dfToUse = applyFilters(currentDf, columnMapping);
         const records = dfToUse.toRecords();
 
-        console.log(
-          `Processing ${records.length} appointment records for top providers calculation`
-        );
 
         const patientVisitRecords: PatientVisitRecord[] = records
           .map((record: any) => {
@@ -110,16 +107,8 @@ export function registerAnalyticsHandlers() {
               record !== null
           );
 
-        console.log(
-          `Found ${patientVisitRecords.length} valid records after filtering nulls`
-        );
 
         const result = calculateTopProviders(patientVisitRecords);
-        console.log(
-          `Returning top providers data for ${
-            Object.keys(result).length
-          } patients`
-        );
 
         return result;
       } catch (error) {
@@ -169,9 +158,6 @@ export function registerAnalyticsHandlers() {
         const dfToUse = applyFilters(currentDf, columnMapping);
         const records = dfToUse.toRecords();
 
-        console.log(
-          `Processing ${records.length} records for provider-patient mapping`
-        );
 
         // Convert records to the format expected by the core algorithm
         const patientRecords: PatientRecord[] = records
@@ -214,19 +200,9 @@ export function registerAnalyticsHandlers() {
               record !== null
           );
 
-        console.log(
-          `Found ${patientRecords.length} valid records after filtering nulls`
-        );
 
         const result = mapProvidersToPatientsCore(patientRecords);
 
-        console.log(
-          `Mapping complete: ${
-            Object.keys(result.providerToPatients).length
-          } providers with ${
-            Object.keys(result.patientToProvider).length
-          } patients assigned`
-        );
 
         return result;
       } catch (error) {
@@ -272,10 +248,16 @@ export function registerAnalyticsHandlers() {
           providerColumn,
           patientColumns
         );
+        // SECON requires a date column for chronological ordering
+        if (!columnMapping?.appointmentDate) {
+          throw new Error("Date column is required for SECON index calculation");
+        }
+        
         const seconResult = calculateSeconIndex(
           dfToUse,
           providerColumn,
-          patientColumns
+          patientColumns,
+          columnMapping.appointmentDate
         );
         const mmciResult = calculateMmciIndex(
           dfToUse,

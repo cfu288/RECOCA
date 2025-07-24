@@ -39,7 +39,6 @@ export function calculateMmciIndex(
       };
     }
 
-    // Verify the provider column exists
     if (!df.columns.includes(providerColumn)) {
       console.error(
         `Provider column '${providerColumn}' not found in DataFrame.`
@@ -50,7 +49,6 @@ export function calculateMmciIndex(
       };
     }
 
-    // Verify at least one patient identifier column exists
     const missingColumns = patientIdentifierColumns.filter(
       (col) => !df.columns.includes(col)
     );
@@ -64,67 +62,106 @@ export function calculateMmciIndex(
       };
     }
 
-    const patientMap = new Map<string, string[]>();
-    const records = df.toRecords();
+    const validProviders = df.filter(
+      pl
+        .col(providerColumn)
+        .isNotNull()
+        .and(pl.col(providerColumn).neq(pl.lit("")))
+    );
 
-    records.forEach((row: Record<string, string>) => {
-      const patientValues = patientIdentifierColumns.map(
-        (col) => row[col] || ""
-      );
-      const compositePatientId = patientValues.join("|");
-
-      const provider = row[providerColumn];
-      if (provider) {
-        if (!patientMap.has(compositePatientId)) {
-          patientMap.set(compositePatientId, []);
-        }
-        patientMap.get(compositePatientId)!.push(provider);
-      }
-    });
-
-    if (patientMap.size === 0) {
+    if (validProviders.height === 0) {
       return {
         averageMmci: 0,
         patientMmciScores: {},
       };
     }
 
-    let totalMmciSum = 0;
-    let patientCount = 0;
-    const patientMmciScores: PatientContinuityScores = {};
+    let workingDf = validProviders;
+    let patientIdCol = "patient_id";
 
-    for (const [patientId, providers] of patientMap.entries()) {
-      // Skip patients with <2 visits
-      if (providers.length < 2) {
-        continue;
-      }
+    if (patientIdentifierColumns.length > 1) {
+      // Concatenate patient identifier columns with | separator
+      const concatExpr = patientIdentifierColumns
+        .map((col) => pl.col(col).fillNull("").cast(pl.Utf8))
+        .reduce((acc, col) => acc.add(pl.lit("|")).add(col));
 
-      const totalVisits = providers.length;
-
-      // Count unique providers
-      const uniqueProviders = new Set(providers);
-      const numProviders = uniqueProviders.size;
-
-      // Calculate MMCI according to the formula
-      // MMCI = (1 - (Number of Providers / (Number of Visits + 0.1))) /
-      //        (1 - (1 / (Number of Visits + 0.1)))
-      const adjustedVisits = totalVisits + 0.1;
-      const numerator = 1 - numProviders / adjustedVisits;
-      const denominator = 1 - 1 / adjustedVisits;
-
-      const patientMmci = denominator !== 0 ? numerator / denominator : 0;
-
-      // Ensure the score is between 0 and 1
-      const boundedMmci = Math.max(0, Math.min(1, patientMmci));
-
-      patientMmciScores[patientId] = boundedMmci;
-      totalMmciSum += boundedMmci;
-      patientCount++;
+      workingDf = workingDf.withColumn(concatExpr.alias(patientIdCol));
+    } else {
+      patientIdCol = patientIdentifierColumns[0];
     }
 
-    // Calculate average MMCI across all patients
-    const averageMmci =
-      patientCount > 0 ? totalMmciSum / patientCount : undefined;
+    const patientStats = workingDf
+      .groupBy(patientIdCol)
+      .agg(
+        pl.len().alias("total_visits"),
+        pl.col(providerColumn).nUnique().alias("unique_providers")
+      );
+
+    const eligiblePatients = patientStats.filter(
+      pl.col("total_visits").gtEq(2)
+    );
+
+    if (eligiblePatients.height === 0) {
+      return {
+        averageMmci: undefined,
+        patientMmciScores: {},
+      };
+    }
+
+    // Calculate MMCI for each patient
+    // MMCI = (1 - (Number of Providers / (Number of Visits + 0.1))) /
+    //        (1 - (1 / (Number of Visits + 0.1)))
+    const mmciScores = eligiblePatients
+      .withColumn(pl.col("total_visits").add(0.1).alias("adjusted_visits"))
+      .withColumn(
+        pl
+          .lit(1)
+          .sub(
+            pl
+              .col("unique_providers")
+              .cast(pl.Float64)
+              .div(pl.col("adjusted_visits"))
+          )
+          .alias("numerator")
+      )
+      .withColumn(
+        pl
+          .lit(1)
+          .sub(pl.lit(1).div(pl.col("adjusted_visits")))
+          .alias("denominator")
+      )
+      .withColumn(
+        pl
+          .when(pl.col("denominator").neq(0))
+          .then(pl.col("numerator").div(pl.col("denominator")))
+          .otherwise(pl.lit(0))
+          .alias("mmci_raw")
+      )
+      .withColumn(
+        // Ensure the score is between 0 and 1
+        pl
+          .when(pl.col("mmci_raw").lt(0))
+          .then(pl.lit(0))
+          .when(pl.col("mmci_raw").gt(1))
+          .then(pl.lit(1))
+          .otherwise(pl.col("mmci_raw"))
+          .alias("mmci_score")
+      )
+      .select([patientIdCol, "mmci_score"]);
+
+    const patientMmciScores: PatientContinuityScores = {};
+    const scoresRecords = mmciScores.toRecords();
+
+    scoresRecords.forEach((row) => {
+      const patientId = row[patientIdCol] as string;
+      const mmciScore = row.mmci_score as number;
+      if (patientId && typeof mmciScore === "number") {
+        patientMmciScores[patientId] = mmciScore;
+      }
+    });
+
+    const avgMmciDf = mmciScores.select(pl.col("mmci_score").mean());
+    const averageMmci = avgMmciDf.getColumn("mmci_score").get(0) as number;
 
     return {
       averageMmci,

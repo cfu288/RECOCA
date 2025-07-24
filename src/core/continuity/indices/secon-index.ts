@@ -37,18 +37,31 @@ import {
  * @param df DataFrame containing patient and provider data
  * @param providerColumn Column name containing provider identifiers
  * @param patientIdentifierColumns Array of column names that together uniquely identify a patient
+ * @param dateColumn Column name containing visit dates for chronological sorting (required)
  * @returns Average SECON index across all patients, percentage with SECON >= 0.7, and individual patient scores
  */
 export function calculateSeconIndex(
   df: pl.DataFrame,
   providerColumn: string,
-  patientIdentifierColumns: string[]
+  patientIdentifierColumns: string[],
+  dateColumn: string
 ): SeconIndexResult {
   try {
     // Verify the provider column exists
     if (!df.columns.includes(providerColumn)) {
       console.error(
         `Provider column '${providerColumn}' not found in DataFrame.`
+      );
+      return {
+        averageSecon: undefined,
+        patientSeconScores: {},
+      };
+    }
+
+    // Verify the date column exists (required for SECON)
+    if (!df.columns.includes(dateColumn)) {
+      console.error(
+        `Date column '${dateColumn}' not found in DataFrame. SECON requires chronological ordering.`
       );
       return {
         averageSecon: undefined,
@@ -77,60 +90,91 @@ export function calculateSeconIndex(
       };
     }
 
-    // Note: Records are assumed to be in chronological order within each patient
-    // This is a critical assumption for SECON since it depends on visit sequence
-    const patientMap = new Map<string, string[]>();
-    const records = df.toRecords();
+    const validProviders = df.filter(
+      pl
+        .col(providerColumn)
+        .isNotNull()
+        .and(pl.col(providerColumn).neq(pl.lit("")))
+    );
 
-    records.forEach((row: Record<string, string>) => {
-      const patientValues = patientIdentifierColumns.map(
-        (col) => row[col] || ""
-      );
-      const compositePatientId = patientValues.join("|");
-
-      const provider = row[providerColumn];
-      if (provider) {
-        if (!patientMap.has(compositePatientId)) {
-          patientMap.set(compositePatientId, []);
-        }
-        patientMap.get(compositePatientId)!.push(provider);
-      }
-    });
-
-    if (patientMap.size === 0) {
+    if (validProviders.height === 0) {
       return {
         averageSecon: 0,
         patientSeconScores: {},
       };
     }
 
-    let totalSeconSum = 0;
-    let patientCount = 0;
-    const patientSeconScores: PatientContinuityScores = {};
+    let workingDf = validProviders;
+    let patientIdCol = "patient_id";
 
-    for (const [patientId, providers] of patientMap.entries()) {
-      if (providers.length < 2) {
-        continue;
-      }
+    if (patientIdentifierColumns.length > 1) {
+      // Concatenate patient identifier columns with | separator
+      const concatExpr = patientIdentifierColumns
+        .map((col) => pl.col(col).fillNull("").cast(pl.Utf8))
+        .reduce((acc, col) => acc.add(pl.lit("|")).add(col));
 
-      const totalVisits = providers.length;
-      let sameProviderSequences = 0;
-
-      for (let i = 0; i < totalVisits - 1; i++) {
-        if (providers[i] === providers[i + 1]) {
-          sameProviderSequences++;
-        }
-      }
-
-      const patientSecon = sameProviderSequences / (totalVisits - 1);
-      patientSeconScores[patientId] = patientSecon;
-      totalSeconSum += patientSecon;
-      patientCount++;
+      workingDf = workingDf.withColumn(concatExpr.alias(patientIdCol));
+    } else {
+      patientIdCol = patientIdentifierColumns[0];
     }
 
-    // Calculate average SECON across all patients (excluding those with only one visit)
-    const averageSecon =
-      patientCount > 0 ? totalSeconSum / patientCount : undefined;
+    // IMPORTANT: SECON requires visits to be in chronological order
+    // Sort by patient and date to ensure chronological order within each patient
+    workingDf = workingDf.sort([patientIdCol, dateColumn]);
+
+    const withPrevProvider = workingDf.withColumn(
+      pl.col(providerColumn).shift(1).over(patientIdCol).alias("prev_provider")
+    );
+
+    const withSameProvider = withPrevProvider.withColumn(
+      pl
+        .when(pl.col("prev_provider").isNotNull())
+        .then(pl.col(providerColumn).eq(pl.col("prev_provider")).cast(pl.Int32))
+        .otherwise(pl.lit(null))
+        .alias("same_provider")
+    );
+
+    const seconByPatient = withSameProvider
+      .groupBy(patientIdCol)
+      .agg(
+        pl.col("same_provider").sum().alias("same_provider_count"),
+        pl.col("same_provider").count().alias("sequence_pairs")
+      );
+
+    const eligiblePatients = seconByPatient.filter(
+      pl.col("sequence_pairs").gt(0)
+    );
+
+    if (eligiblePatients.height === 0) {
+      return {
+        averageSecon: undefined,
+        patientSeconScores: {},
+      };
+    }
+
+    const seconScores = eligiblePatients
+      .withColumn(
+        pl
+          .col("same_provider_count")
+          .cast(pl.Float64)
+          .div(pl.col("sequence_pairs").cast(pl.Float64))
+          .alias("secon_score")
+      )
+      .select([patientIdCol, "secon_score"]);
+
+    const patientSeconScores: PatientContinuityScores = {};
+    const scoresRecords = seconScores.toRecords();
+
+    scoresRecords.forEach((row) => {
+      const patientId = row[patientIdCol] as string;
+      const seconScore = row.secon_score as number;
+      if (patientId && typeof seconScore === "number") {
+        patientSeconScores[patientId] = seconScore;
+      }
+    });
+
+    const avgSeconDf = seconScores.select(pl.col("secon_score").mean());
+    const averageSecon = avgSeconDf.getColumn("secon_score").get(0) as number;
 
     return {
       averageSecon,

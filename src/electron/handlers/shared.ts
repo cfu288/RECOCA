@@ -8,7 +8,6 @@ export function getPolars(): typeof pl {
   if (polarsInstance === null) {
     try {
       polarsInstance = loadPolars();
-      console.log("Successfully loaded polars");
     } catch (error) {
       console.error("Failed to load polars:", error);
       if (app.isPackaged) {

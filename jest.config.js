@@ -17,6 +17,8 @@ module.exports = {
     // Ignore build output directories to prevent module resolution conflicts
     "<rootDir>/out/",
     "<rootDir>/.vite/",
+    // Ignore documentation directories
+    "<rootDir>/docs/",
   ],
   transformIgnorePatterns: [
     "/node_modules/(?!nodejs-polars).+\\.js$"
