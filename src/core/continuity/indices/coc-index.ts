@@ -33,63 +33,109 @@ export function calculateCocIndex(
       };
     }
 
-    const patientMap = new Map<string, string[]>();
-    const records = df.toRecords();
-
-    records.forEach((row: Record<string, string>) => {
-      const patientValues = patientIdentifierColumns.map(
-        (col) => row[col] || ""
+    if (!df.columns.includes(providerColumn)) {
+      console.error(
+        `Provider column '${providerColumn}' not found in DataFrame.`
       );
-      const compositePatientId = patientValues.join("|");
+      return {
+        averageCoc: undefined,
+        patientCocScores: {},
+      };
+    }
 
-      const provider = row[providerColumn];
-      if (provider) {
-        if (!patientMap.has(compositePatientId)) {
-          patientMap.set(compositePatientId, []);
-        }
-        patientMap.get(compositePatientId)!.push(provider);
-      }
-    });
+    const missingColumns = patientIdentifierColumns.filter(
+      (col) => !df.columns.includes(col)
+    );
+    if (missingColumns.length > 0) {
+      console.error(
+        `Patient identifier column(s) not found: ${missingColumns.join(", ")}`
+      );
+      return {
+        averageCoc: undefined,
+        patientCocScores: {},
+      };
+    }
 
-    if (patientMap.size === 0) {
+    const validProviders = df.filter(
+      pl
+        .col(providerColumn)
+        .isNotNull()
+        .and(pl.col(providerColumn).neq(pl.lit("")))
+    );
+
+    if (validProviders.height === 0) {
       return {
         averageCoc: 0,
         patientCocScores: {},
       };
     }
 
-    let totalCocSum = 0;
-    let patientCount = 0;
-    const patientCocScores: PatientContinuityScores = {};
+    let workingDf = validProviders;
+    let patientIdCol = "patient_id";
 
-    for (const [patientId, providers] of patientMap.entries()) {
-      if (providers.length === 0 || providers.length === 1) {
-        continue;
-      }
+    if (patientIdentifierColumns.length > 1) {
+      // Concatenate patient identifier columns with | separator
+      const concatExpr = patientIdentifierColumns
+        .map((col) => pl.col(col).fillNull("").cast(pl.Utf8))
+        .reduce((acc, col) => acc.add(pl.lit("|")).add(col));
 
-      const totalVisits = providers.length;
-      const providerCounts = new Map<string, number>();
-
-      for (const provider of providers) {
-        providerCounts.set(provider, (providerCounts.get(provider) || 0) + 1);
-      }
-
-      const sumOfSquares = Array.from(providerCounts.values()).reduce(
-        (sum, count) => sum + Math.pow(count, 2),
-        0
-      );
-
-      const patientCoc =
-        (sumOfSquares - totalVisits) / (totalVisits * (totalVisits - 1));
-
-      patientCocScores[patientId] = patientCoc;
-      totalCocSum += patientCoc;
-      patientCount++;
+      workingDf = workingDf.withColumn(concatExpr.alias(patientIdCol));
+    } else {
+      patientIdCol = patientIdentifierColumns[0];
     }
 
-    // Calculate average CoC across all patients (excluding those with only one visit)
-    const averageCoc =
-      patientCount > 0 ? totalCocSum / patientCount : undefined;
+    const patientProviderCounts = workingDf
+      .groupBy([patientIdCol, providerColumn])
+      .agg(pl.len().alias("visit_count"));
+
+    const countCol = "visit_count";
+
+    const patientStats = patientProviderCounts.groupBy(patientIdCol).agg(
+      pl.col(countCol).sum().alias("total_visits"),
+      // Sum of squares: ∑(n_i^2)
+      pl.col(countCol).pow(2).sum().alias("sum_of_squares")
+    );
+
+    const eligiblePatients = patientStats.filter(pl.col("total_visits").gt(1));
+
+    if (eligiblePatients.height === 0) {
+      return {
+        averageCoc: undefined,
+        patientCocScores: {},
+      };
+    }
+
+    // Calculate CoC for each patient
+    // Formula: CoC = (∑(n_i^2) - N) / (N(N-1))
+    const cocScores = eligiblePatients
+      .withColumn(
+        pl
+          .col("sum_of_squares")
+          .cast(pl.Float64)
+          .sub(pl.col("total_visits").cast(pl.Float64))
+          .div(
+            pl
+              .col("total_visits")
+              .cast(pl.Float64)
+              .mul(pl.col("total_visits").cast(pl.Float64).sub(1))
+          )
+          .alias("coc_score")
+      )
+      .select([patientIdCol, "coc_score"]);
+
+    const patientCocScores: PatientContinuityScores = {};
+    const scoresRecords = cocScores.toRecords();
+
+    scoresRecords.forEach((row) => {
+      const patientId = row[patientIdCol] as string;
+      const cocScore = row.coc_score as number;
+      if (patientId && typeof cocScore === "number") {
+        patientCocScores[patientId] = cocScore;
+      }
+    });
+
+    const avgCocDf = cocScores.select(pl.col("coc_score").mean());
+    const averageCoc = avgCocDf.getColumn("coc_score").get(0) as number;
 
     return {
       averageCoc,

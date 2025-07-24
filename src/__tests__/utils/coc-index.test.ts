@@ -341,4 +341,43 @@ describe("CoC (Continuity of Care) Index Calculation", () => {
     expect(result.averageCoc).toBeUndefined();
     expect(Object.keys(result.patientCocScores).length).toBe(0);
   });
+
+  test("should handle invalid provider column gracefully", () => {
+    const df = pl.DataFrame({
+      patientId: ["P1", "P1", "P1"],
+      provider: ["A", "A", "B"],
+    });
+
+    const result = calculateCocIndex(df, "nonExistentColumn", ["patientId"]);
+    expect(result.averageCoc).toBeUndefined();
+    expect(Object.keys(result.patientCocScores).length).toBe(0);
+  });
+
+  test("should handle invalid patient identifier column gracefully", () => {
+    const df = pl.DataFrame({
+      patientId: ["P1", "P1", "P1"],
+      provider: ["A", "A", "B"],
+    });
+
+    const result = calculateCocIndex(df, "provider", ["nonExistentColumn"]);
+    expect(result.averageCoc).toBeUndefined();
+    expect(Object.keys(result.patientCocScores).length).toBe(0);
+  });
+
+  test("should handle partially missing patient identifier columns", () => {
+    const df = pl.DataFrame({
+      patientId: ["P1", "P1", "P1"],
+      lastName: ["Smith", "Smith", "Smith"],
+      provider: ["A", "A", "B"],
+    });
+
+    // When one of multiple patient ID columns doesn't exist
+    const result = calculateCocIndex(df, "provider", [
+      "patientId",
+      "lastName",
+      "nonExistentColumn",
+    ]);
+    expect(result.averageCoc).toBeUndefined();
+    expect(Object.keys(result.patientCocScores).length).toBe(0);
+  });
 });
