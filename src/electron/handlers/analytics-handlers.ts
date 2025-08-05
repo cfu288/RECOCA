@@ -16,6 +16,7 @@ import { calculateUpcIndex } from "../../core/continuity/indices/upc-index";
 import { calculateCocIndex } from "../../core/continuity/indices/coc-index";
 import { calculateSeconIndex } from "../../core/continuity/indices/secon-index";
 import { calculateMmciIndex } from "../../core/continuity/indices/mmci-index";
+import { calculateRollingContIndex } from "../../core/continuity/indices/rolling-cont-index";
 
 /**
  * Apply filters to a DataFrame based on column mapping configuration.

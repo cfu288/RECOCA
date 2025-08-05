@@ -1,0 +1,772 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{fancyvrb}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% Define colors for code listings
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+% Code listing style
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+% Custom commands
+\newcommand{\upc}{\text{UPC}}
+\newcommand{\bbcoc}{\text{BB-COC}}
+\newcommand{\mmci}{\text{MMCI}}
+\newcommand{\secon}{\text{SECON}}
+
+\title{Introduction of the Rolling Continuity of Care Index}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Why We Need a New Continuity Metric}
+
+\subsection{The Gap in Current Metrics}
+
+Traditional continuity metrics have been invaluable for research and establishing the importance of continuity. However, a gap exists between research metrics and operational needs:
+
+\begin{enumerate}
+\item \textbf{Temporal Resolution}: Traditional metrics excel at measuring long-term patterns but are not built to capture short-term changes. This makes them less suitable for monitoring interventions or seasonal variations.
+
+\item \textbf{Static vs. Dynamic Measurement}: Current metrics provide point-in-time snapshots. Healthcare quality improvement projects can benefit from  dynamic tracking to identify trends.
+
+\item \textbf{Trade-offs in Current Metrics}:
+\begin{itemize}
+\item \textbf{UPC}: Simple and widely used, but cannot distinguish between 2 vs 10 providers, and can over-represent continuity in patient populations with a low number of visits.
+\item \textbf{BB-COC/MMCI}: Address UPC's limitations but require complex calculations
+\item \textbf{SECON}: Captures temporal patterns but misses overall provider relationships
+\item All lack time-series capability for trend monitoring
+\end{itemize}
+
+\item \textbf{Operational Challenges}: Quality improvement teams need metrics that can:
+\begin{itemize}
+\item Show month-to-month or week-to-week changes
+\item Identify when continuity drops below targets
+\item Measure the impact of scheduling changes or provider availability
+\end{itemize}
+
+\item \textbf{The Feedback Loop Problem}: With traditional metrics requiring a larger amount of data (classically 6-12 months), clinics cannot quickly assess whether changes are improving continuity.
+\end{enumerate}
+
+\subsection{The Rolling Continuity Index: Complementing Existing Metrics}
+
+The Rolling Continuity Index fills this operational gap while complementing existing metrics:
+
+\begin{enumerate}
+\item \textbf{Builds on SECON's Foundation}: Uses the same sequential logic as SECON but aggregates at the clinic level and adds time-series capability.
+
+\item \textbf{Temporal Granularity}: Measures continuity by day, week, month, or custom periods - whatever matches your operational needs.
+
+\item \textbf{Dynamic Tracking}: Instead of one number, provides a trend line showing how continuity changes over time.
+
+\item \textbf{Rapid Feedback}: See the impact of changes within days or weeks rather than months.
+
+\item \textbf{Maintains Simplicity}: ``What percentage of follow-up visits were with the same provider this month?'' - easy to explain and act upon.
+
+\item \textbf{Complements, Not Replaces}:
+\begin{itemize}
+\item Use alongside UPC for benchmarking
+\item Use with BB-COC/MMCI for comprehensive assessment
+\item Adds the time dimension that all other metrics lack
+\end{itemize}
+\end{enumerate}
+
+\subsection{Use Case Example}
+
+A clinic implements a new scheduling system in January. With traditional metrics, they would need to wait until June or later to see if continuity improved. With the Rolling Continuity Index, they can see weekly or monthly changes immediately:
+
+\begin{itemize}
+\item December: 65\% continuity
+\item January week 1: 62\% (implementation disruption)
+\item January week 2: 68\% (staff adapting)
+\item January week 3: 72\% (system optimized)
+\item January week 4: 74\% (sustained improvement)
+\end{itemize}
+
+This rapid feedback enables course corrections and celebrates successes in real-time.
+
+\section{Deeper dive into Indexes}
+
+While there are 32 or so indexes published in the literature I summarize the most common ones below, each designed to capture different aspects of this continuity:
+
+\begin{enumerate}
+\item \textbf{UPC (Usual Provider of Care)} - Simple density measure showing percentage of visits with most common provider
+\item \textbf{BB-COC (Bice-Boxerman Continuity of Care)} - Dispersion measure accounting for provider fragmentation
+\item \textbf{MMCI (Modified Modified Continuity Index)} - Dispersion measure optimized for multi-provider settings (residency programs)
+\item \textbf{SECON (Sequential Continuity of Care)} - Sequence measure tracking visit-to-visit provider consistency
+\item \textbf{Rolling Continuity Index} - New time-series measure we are proposing enabling clinics to monitor continuity trends and respond to changes in real-time - a capability missing from traditional point-in-time metrics.
+\end{enumerate}
+
+
+\section{Key Methodology Differences}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Metric} & \textbf{Perspective} & \textbf{Methodology} & \textbf{Accounts for Number of Providers} \\
+\midrule
+\textbf{UPC} & Patient & Density & No \\
+\textbf{BB-COC} & Patient & Dispersion & Yes \\
+\textbf{MMCI} & Patient & Dispersion & Yes \\
+\textbf{SECON} & Patient & Sequence & No \\
+\textbf{Rolling} & Clinic & Sequence & No \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+\item \textbf{Patient perspective}: Primarily calculates individual scores, but can be averaged across a clinic to report clinic-level performance
+\item \textbf{Clinic perspective}: Directly calculates clinic-level performance
+\item \textbf{Density}: Measures concentration with most common provider
+\item \textbf{Dispersion}: Measures distribution across all providers
+\item \textbf{Sequence}: Measures consecutive visit patterns
+\end{itemize}
+
+\section{How Patient Metrics Become Clinic Metrics}
+
+\textbf{Important}: The first four indices (UPC, BB-COC, MMCI, SECON) calculate continuity scores for individual patients. To obtain a clinic-level metric, these individual patient scores are averaged:
+
+\begin{equation}
+\text{Clinic Continuity Score} = \text{Average of all eligible patients' individual scores}
+\end{equation}
+
+For example:
+\begin{itemize}
+\item Patient 1: UPC = 0.80
+\item Patient 2: UPC = 0.60
+\item Patient 3: UPC = 0.70
+\item \textbf{Clinic UPC = (0.80 + 0.60 + 0.70) / 3 = 0.70}
+\end{itemize}
+
+The Rolling Continuity Index differs - it directly calculates a clinic-level metric by aggregating all patient transitions within each time period.
+
+\section{Index Descriptions and Calculations}
+
+\subsection{UPC (Usual Provider of Care)}
+
+\textbf{Description}: Measures the proportion of visits with the most frequently seen provider.
+
+\textbf{Formula}:
+\begin{equation}
+\upc = \frac{\max(n_1, n_2, ..., n_k)}{N}
+\end{equation}
+
+Where:
+\begin{itemize}
+\item $\max(n_1, n_2, ..., n_k)$ = highest number of visits to any single provider
+\item $N$ = total number of visits
+\end{itemize}
+
+\textbf{Requirements}:
+\begin{itemize}
+\item Minimum 2 visits per patient
+\item Does NOT require appointment dates
+\end{itemize}
+
+\textbf{Example Calculations}:
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\toprule
+Patient Visits & UPC & Explanation \\
+\midrule
+A-A-B-B & 0.50 & $\max(2,2)/4 = 0.50$ \\
+A-A-A-B & 0.75 & $\max(3,1)/4 = 0.75$ \\
+A-B-C-D & 0.25 & $\max(1,1,1,1)/4 = 0.25$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Strengths}:
+\begin{itemize}
+\item Simple to calculate and interpret
+\item Intuitive 
+\end{itemize}
+
+\textbf{Limitations}:
+\begin{itemize}
+\item Ignores distribution across other providers
+\item Does not capture visit sequence
+\item Is intended in environments where there is a designation of a single PCP
+\item \textbf{Mathematical floor based on visit count}: The minimum possible UPC = 1/N where N = total visits
+\begin{itemize}
+\item This reflects the reality that with few visits, even fragmented care involves repeat providers
+\item Examples: 2 visits min = 0.50, 3 visits min = 0.33, 4 visits min = 0.25
+\item This is a floor that can be seen as over-representing patient experienced continuity for lower visit counts (a patient who presents twice and sees 2 different providers experiences 0 continuity, but is calculated as a UPC of 0.50)
+\item It could be argued that it is appropriately reflecting that 2 visits with 2 providers is less fragmented than 10 visits with 10 providers
+\end{itemize}
+\end{itemize}
+
+\subsection{BB-COC (Bice-Boxerman Continuity of Care)}
+
+\textbf{Description}: Developed to address UPC's inability to distinguish between patients seeing 2 providers versus 10 providers. Measures both the concentration of visits AND the total number of providers seen.
+
+\textbf{Formula}:
+\begin{equation}
+\bbcoc = \frac{\sum n_i^2 - N}{N(N-1)}
+\end{equation}
+
+Where:
+\begin{itemize}
+\item $n_i$ = number of visits to provider $i$
+\item $N$ = total number of visits
+\end{itemize}
+
+\textbf{Requirements}:
+\begin{itemize}
+\item Minimum 2 visits per patient
+\item Does NOT require appointment dates
+\end{itemize}
+
+\textbf{Example Calculations}:
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\toprule
+Patient Visits & BB-COC & Explanation \\
+\midrule
+A-A-B-B & 0.33 & $((2^2+2^2)-4)/(4 \times 3) = 4/12 = 0.33$ \\
+A-A-A-B & 0.50 & $((3^2+1^2)-4)/(4 \times 3) = 6/12 = 0.50$ \\
+A-B-C-D & 0.00 & $((1^2+1^2+1^2+1^2)-4)/(4 \times 3) = 0/12 = 0.00$ \\
+A-A & 1.00 & $((2^2)-2)/(2 \times 1) = 2/2 = 1.00$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Strengths}:
+\begin{itemize}
+\item \textbf{Addresses UPC's key limitation}: Accounts for the number of different providers seen
+\item Distinguishes between seeing 2 providers vs. 10 providers (both might have UPC = 0.50)
+\item No PCP assignment required - works with claims data
+\item Well-established in literature
+\item More comprehensive measure of care concentration
+\end{itemize}
+
+\textbf{Limitations}:
+\begin{itemize}
+\item Complex formula 
+\item Non-linear scale makes interpretation less intuitive
+\item Returns 0 until a provider is seen at least twice
+\item For residency clinics, not a metric that is published as often
+\end{itemize}
+
+\subsection{MMCI (Modified Modified Continuity Index)}
+
+\textbf{Description}: Developed to provide a more ``forgiving'' measure than BB-COC for settings where patients legitimately need to see multiple providers (e.g., residency clinics with part-time faculty and rotating residents). Balances the need to measure continuity with the reality of multi-provider care teams.
+
+\textbf{Formula}:
+\begin{equation}
+\mmci = \frac{1 - \frac{P}{V+0.1}}{1 - \frac{1}{V+0.1}}
+\end{equation}
+
+Where:
+\begin{itemize}
+\item $P$ = number of unique providers
+\item $V$ = total number of visits
+\item 0.1 = adjustment factor to prevent division by zero
+\end{itemize}
+
+\textbf{Requirements}:
+\begin{itemize}
+\item Minimum 2 visits per patient
+\item Does NOT require appointment dates
+\end{itemize}
+
+\textbf{Example Calculations}:
+\begin{table}[h]
+\centering
+\begin{tabular}{llll}
+\toprule
+Patient Visits & Providers & MMCI & Explanation \\
+\midrule
+A-A-B-B & 2 providers, 4 visits & 0.67 & $(1-(2/4.1))/(1-(1/4.1)) = 0.67$ \\
+A-A-A-B & 2 providers, 4 visits & 0.67 & Same provider count = same MMCI \\
+A-B-C-D & 4 providers, 4 visits & 0.03 & $(1-(4/4.1))/(1-(1/4.1)) = 0.03$ \\
+A-A & 1 provider, 2 visits & 1.00 & $(1-(1/2.1))/(1-(1/2.1)) = 1.00$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Strengths}:
+\begin{itemize}
+\item \textbf{Specifically designed for multi-provider settings}: Ideal for residency clinics
+\item Less punitive than BB-COC when patients must see multiple providers
+\item Attempts to balance UPC's simplicity with BB-COC's sophistication
+\item Generally produces more ``forgiving'' scores that may better reflect continuity in team-based care
+\item Still captures the negative impact of excessive provider fragmentation
+\end{itemize}
+
+\textbf{Limitations}:
+\begin{itemize}
+\item Formula remains complex despite simplification attempts
+\item Scale interpretation is not immediately intuitive
+\item May overstate continuity in some cases
+\item For residency clinics, not a metric that is published as often compared to UPC
+\end{itemize}
+
+\subsection{SECON (Sequential Continuity of Care)}
+
+\textbf{Description}: Measures the frequency of seeing the same provider in consecutive visits.
+
+\textbf{Formula}:
+\begin{equation}
+\secon = \frac{\sum s_i}{N-1}
+\end{equation}
+
+Where:
+\begin{itemize}
+\item $s_i = 1$ if visits $i$ and $i+1$ are to same provider, 0 otherwise
+\item $N$ = total number of visits
+\end{itemize}
+
+\textbf{Requirements}:
+\begin{itemize}
+\item Minimum 2 visits per patient
+\item REQUIRES appointment dates for chronological ordering
+\end{itemize}
+
+\textbf{Example Calculations}:
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\toprule
+Visit Sequence & SECON & Explanation \\
+\midrule
+A$\rightarrow$A$\rightarrow$B$\rightarrow$B & 0.67 & $(1+0+1)/3 = 0.67$ \\
+A$\rightarrow$B$\rightarrow$A$\rightarrow$B & 0.00 & $(0+0+0)/3 = 0.00$ \\
+A$\rightarrow$A$\rightarrow$A$\rightarrow$A & 1.00 & $(1+1+1)/3 = 1.00$ \\
+A$\rightarrow$A$\rightarrow$B$\rightarrow$B$\rightarrow$B$\rightarrow$B & 0.80 & $(1+0+1+1+1)/5 = 0.80$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Strengths}:
+\begin{itemize}
+\item Captures temporal patterns
+\item Identifies provider switching
+\item Useful for follow-up care analysis
+\end{itemize}
+
+\textbf{Limitations}:
+\begin{itemize}
+\item Can be 0 if alternating between providers, underrepresenting experienced patient continuity
+\item Requires date information
+\item Doesn't account for total provider count
+\end{itemize}
+
+\subsection{Rolling Continuity Index (New)}
+
+\textbf{Description}: Measures continuity by tracking the percentage of patients who see the same provider as their previous appointment, aggregated over time periods.
+
+\textbf{Formula}:
+\begin{equation}
+\text{Rolling Index} = \frac{\text{appointments where patient saw same provider as previous visit during period}}{\text{total number of follow-up appointments in period}}
+\end{equation}
+
+Where ``follow-up appointments'' means any appointment that isn't a patient's first visit.
+
+\textbf{Requirements}:
+\begin{itemize}
+\item Minimum 2 visits per patient (across all time)
+\item REQUIRES appointment dates
+\item Configurable time periods: day, week, month, or custom
+\end{itemize}
+
+\textbf{Key Algorithm Steps}:
+\begin{enumerate}
+\item Sort all appointments chronologically per patient
+\item For each appointment (except first), compare provider with previous appointment
+\item Attribute continuity score to the period of the current appointment
+\item Calculate percentage for each period
+\item Optionally, average all percentages across all periods for an average continuity metric. This would be similar to how other indexes currently represent their results: as a single value
+\end{enumerate}
+
+\textbf{Example Calculation}:
+Patient A appointments:
+\begin{itemize}
+\item March 15, 2024: Dr1
+\item April 10, 2024: Dr1 (same as previous $\rightarrow$ counts as 1 for April)
+\item May 20, 2024: Dr2 (different from previous $\rightarrow$ counts as 0 for May)
+\end{itemize}
+
+Results:
+\begin{itemize}
+\item April 2024: $1/1 = 100\%$
+\item May 2024: $0/1 = 0\%$
+\item Average: $50\%$
+\end{itemize}
+
+\textbf{Configurable Time Periods}:
+\begin{itemize}
+\item \textbf{Daily}: Track continuity day-by-day
+\item \textbf{Weekly}: Aggregate by week number from earliest date
+\item \textbf{Monthly}: Standard calendar months (or custom boundary day)
+\item \textbf{Custom}: Any number of days (e.g., 14-day periods)
+\end{itemize}
+
+\textbf{Strengths}:
+\begin{itemize}
+\item Provides time-series data for trend analysis
+\item Works with shorter data spans (weeks vs years)
+\item Clinic-level metric (not patient-level)
+\item Flexible time period configuration
+\item Can identify seasonal patterns
+\end{itemize}
+
+\textbf{Limitations}:
+\begin{itemize}
+\item Requires temporal data
+\item May have sparse data in some periods if appointment counts are low during a specific period if the chosen period size is too small (e.g. 1 day)
+\item New metric not validated yet
+\end{itemize}
+
+\section{Comparison Examples}
+
+\subsection{Example 1: The A$\rightarrow$B$\rightarrow$A$\rightarrow$B Pattern}
+
+\textbf{4 visits alternating between 2 providers}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\toprule
+Metric & Value & What This Reveals \\
+\midrule
+UPC & 0.50 & Two primary providers share care equally \\
+BB-COC & 0.33 & Some concentration, better than random \\
+MMCI & 0.67 & Limited provider pool (only 2) \\
+SECON & 0.00 & No visit-to-visit continuity \\
+Rolling & 0.00 & Every appointment changes provider \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This pattern illustrates why multiple metrics matter: concentration metrics show coordinated care between two providers, while sequence metrics reveal lack of consecutive continuity.
+
+\subsection{Example 2: Maximum Fragmentation (A$\rightarrow$B$\rightarrow$C$\rightarrow$D)}
+
+\textbf{4 visits with 4 different providers}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\toprule
+Metric & Value & What This Reveals \\
+\midrule
+UPC & 0.25 & No primary provider (minimum possible) \\
+BB-COC & 0.00 & Complete fragmentation \\
+MMCI & 0.03 & Near-zero continuity \\
+SECON & 0.00 & No consecutive continuity \\
+Rolling & 0.00 & No follow-up continuity \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+All metrics agree: this represents minimal continuity of care.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\toprule
+Metric & Value & Notes \\
+\midrule
+UPC & 0.50 & Equal visits to each \\
+BB-COC & 0.40 & Moderate concentration \\
+MMCI & 0.80 & Only 2 providers for 6 visits \\
+SECON & 0.60 & 3 same-provider pairs out of 5 \\
+Rolling & Month-dependent & High in months 1\&3, low when switching \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{What Makes a Good Continuity Metric?}
+
+Note that the following are more my opinions than objective truth.
+
+\subsection{Desirable Characteristics}
+
+A good continuity metric should be:
+
+\begin{enumerate}
+\item \textbf{Easy to Understand}
+\begin{itemize}
+\item Clear conceptual meaning
+\item Matches intuitive expectations
+\item Meaningful to patients and providers
+\end{itemize}
+
+\item \textbf{Easy to Calculate}
+\begin{itemize}
+\item Simple formula
+\item Minimal data requirements
+\item Can be ideally computed without specialized software
+\end{itemize}
+
+\item \textbf{Easy to Interpret}
+\begin{itemize}
+\item Natural 0-1 scale where 0 = no continuity, 1 = perfect continuity
+\item Linear relationship (0.5 means ``half the time'')
+\item Actionable insights
+\end{itemize}
+\end{enumerate}
+
+\subsection{Trade-offs Between Simplicity and Sophistication}
+
+\begin{longtable}{p{2cm}p{5cm}p{5cm}p{4cm}}
+\toprule
+\textbf{Metric} & \textbf{Strengths} & \textbf{Limitations} & \textbf{Best Use Case} \\
+\midrule
+\endfirsthead
+\multicolumn{4}{c}{\textit{(continued from previous page)}} \\
+\toprule
+\textbf{Metric} & \textbf{Strengths} & \textbf{Limitations} & \textbf{Best Use Case} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\bottomrule
+\endlastfoot
+
+\textbf{UPC} & 
+• Extremely simple to calculate\newline
+• Intuitive percentage\newline
+• Widely used in literature & 
+• Ignores provider count\newline
+• Floor effects (can't reach 0)\newline
+• May overstate continuity & 
+Quick assessments, established targets, comparing with other clinics \\
+
+\textbf{BB-COC} & 
+• Accounts for provider dispersion\newline
+• No PCP assignment needed\newline
+• Captures care fragmentation & 
+• Complex formula\newline
+• Returns 0 until 2+ visits per provider\newline
+• Non-linear scale & 
+Research studies, claims analysis, comprehensive assessment \\
+
+\textbf{MMCI} & 
+• Less sensitive to provider count\newline
+• Better for training sites\newline
+• Simpler than BB-COC & 
+• Still complex to calculate\newline
+• Abstract interpretation\newline
+• May overstate continuity & 
+Residency clinics, multi-provider practices \\
+
+\textbf{SECON} & 
+• Captures sequential patterns\newline
+• True 0-1 scale\newline
+• Shows handoff frequency & 
+• Requires date sorting\newline
+• Less intuitive concept\newline
+• Ignores overall relationships & 
+Follow-up care analysis, handoff monitoring \\
+
+\textbf{Rolling} & 
+• Time-series tracking\newline
+• Rapid feedback\newline
+• True 0-1 scale & 
+• Requires date grouping\newline
+• New/not validated\newline
+• Clinic-level only & 
+QI initiatives, trend monitoring, intervention tracking \\
+\end{longtable}
+
+\section{Different Dimensions of Continuity}
+
+\subsection{Multiple Valid Perspectives on Continuity}
+
+Continuity of care is multifaceted, and different metrics capture different important aspects:
+
+\begin{enumerate}
+\item \textbf{Sequential Continuity} (SECON, Rolling Index)
+\begin{itemize}
+\item ``Did I see the same provider as my last visit?''
+\item Important for: Follow-up care, managing chronic conditions, building on previous discussions
+\end{itemize}
+
+\item \textbf{Relational Continuity} (UPC, BB-COC, MMCI)
+\begin{itemize}
+\item ``Do I have an ongoing relationship with my provider(s)?''
+\item Important for: Provider familiarity with patient history, trust building, comprehensive care
+\end{itemize}
+
+\item \textbf{Provider Concentration} (BB-COC, MMCI)
+\begin{itemize}
+\item ``How dispersed is my care among different providers?''
+\item Important for: Care coordination, reducing fragmentation, maintaining medical records
+\end{itemize}
+\end{enumerate}
+
+\subsection{Key Differences}
+
+\textbf{Sequential metrics (SECON, Rolling)}: Track visit-to-visit continuity
+\begin{itemize}
+\item Excel at measuring handoffs and follow-up patterns
+\end{itemize}
+
+\textbf{Concentration metrics (UPC, BB-COC, MMCI)}: Measure provider relationships
+\begin{itemize}
+\item Excel at identifying fragmented care vs. stable provider teams
+\end{itemize}
+
+\subsection{The A$\rightarrow$B$\rightarrow$A$\rightarrow$B Example}
+
+This pattern reveals why context matters:
+\begin{itemize}
+\item \textbf{Sequential view}: 0.00 (no consecutive continuity)
+\item \textbf{Concentration view}: 0.50 UPC (only 2 providers)
+\end{itemize}
+
+Both are valid - team-based care with 2 providers differs from fragmented care with many providers, even if sequential continuity is absent.
+
+\subsection{Real-World Implications}
+
+Consider two patients, each with 10 visits:
+
+\textbf{Patient A}: Sees Dr. Smith 5 times, Dr. Jones 5 times (alternating)
+\begin{itemize}
+\item UPC = 0.50, BB-COC $\approx$ 0.44, MMCI $\approx$ 0.89
+\item SECON = 0.00, Rolling = 0.00
+\item \textbf{Interpretation}: Strong relationships with 2 providers but no visit-to-visit continuity
+\item \textbf{Clinical impact}: Good for team-based care, challenging for acute follow-ups
+\end{itemize}
+
+\textbf{Patient B}: Sees Dr. Smith 5 times in a row, then Dr. Jones 5 times
+\begin{itemize}
+\item UPC = 0.50, BB-COC $\approx$ 0.44, MMCI $\approx$ 0.89
+\item SECON = 0.89, Rolling = 0.89
+\item \textbf{Interpretation}: Strong sequential continuity with planned provider transition
+\item \textbf{Clinical impact}: Excellent for chronic disease management, smooth handoff
+\end{itemize}
+
+These patients have identical concentration scores but different care experiences. 
+
+\section{Practical Applications and Conclusion}
+
+Each continuity metric addresses specific measurement needs:
+
+\textbf{UPC} remains the most widely published metric, facilitating comparisons across studies and clinics. Its simplicity makes it ideal for patient communication and established benchmarks (e.g., 75\% targets).
+
+\textbf{BB-COC} provides comprehensive fragmentation analysis, particularly valuable for claims-based research where provider assignments are unknown. While less common in literature, it offers more nuanced insights than UPC.
+
+\textbf{MMCI} serves training environments where multiple providers are both expected and necessary, offering a balanced approach between simplicity and sophistication.
+
+\textbf{SECON} uniquely captures visit-to-visit patterns, making it valuable for chronic disease programs where sequential continuity impacts outcomes.
+
+\textbf{Rolling Index} adds the temporal dimension missing from all traditional metrics, enabling clinics to track trends, monitor interventions, and respond to changes in weeks rather than months.
+
+\subsection{The Value of Multiple Perspectives}
+
+No single metric captures all aspects of continuity. UPC's dominance in literature reflects its simplicity, not superiority. BB-COC and MMCI address UPC's aforementioned limitations. SECON reveals patterns that concentration metrics miss entirely.
+
+The Rolling Index complements these established metrics by transforming continuity measurement from periodic assessment to continuous monitoring. 
+
+\subsection{Final Thoughts}
+
+The Rolling Continuity Index represents the next evolution in continuity measurement. While traditional metrics answer ``How well are we doing?'', the Rolling Index answers ``Are we getting better?'' and ``Is this intervention working?''
+
+
+
+\begin{thebibliography}{10}
+
+\bibitem{hersch2024}
+Derek Hersch, Kristen Klemenhagen, Patricia Adam,
+Measuring continuity in primary care: how it is done and why it matters,
+\textit{Family Practice}, Volume 41, Issue 1, February 2024, Pages 60--64,
+\url{https://doi.org/10.1093/fampra/cmad122}
+
+\bibitem{walker2018}
+Walker J, Payne B, Clemans-Taylor BL, Snyder ED,
+Continuity of Care in Resident Outpatient Clinics: A Scoping Review of the Literature,
+\textit{J Grad Med Educ}, 2018;10(1):16--25,
+doi:10.4300/JGME-D-17-00256.1
+
+\bibitem{jee2006}
+Jee SH, Cabana MD,
+Indices for Continuity of Care: A Systematic Review of the Literature,
+\textit{Medical Care Research and Review}, 2006;63(2):158--188,
+doi:10.1177/1077558705285294
+
+\bibitem{hull2022}
+Hull SA, Williams C, Schofield P, Boomla K, Ashworth M,
+Measuring continuity of care in general practice: a comparison of two methods using routinely collected data,
+\textit{Br J Gen Pract}, 2022;72(724):e773--e779,
+Published 2022 Oct 27, doi:10.3399/BJGP.2022.0043
+
+\bibitem{connolly2022}
+Connolly MJ, Weppner WG, Fortuna RJ, Snyder ED,
+Continuity and Health Outcomes in Resident Clinics: A Scoping Review of the Literature,
+\textit{Cureus}, Published online May 20, 2022,
+doi:10.7759/cureus.25167
+
+\bibitem{pollack2016}
+Pollack CE, Hussey PS, Rudin RS, Fox DS, Lai J, Schneider EC,
+Measuring Care Continuity: A Comparison of Claims-based Methods,
+\textit{Med Care}, 2016;54(5):e30--e34,
+doi:10.1097/MLR.0000000000000018
+
+\bibitem{mbpcc2020}
+The Various Measures of Continuity of Care,
+2020, Accessed May 27, 2025,
+\url{https://mbpcc.co.uk/wp-content/uploads/2020/09/Measures-of-Continuity-Explained.pdf}
+
+\bibitem{sidaway2019}
+Sidaway-Lee K, Gray DP, Evans P,
+A method for measuring continuity of care in day-to-day general practice: a quantitative analysis of appointment data,
+\textit{Br J Gen Pract}, 2019;69(682):e356--e362,
+doi:10.3399/bjgp19X701813
+
+\bibitem{bice1977}
+Bice TW, Boxerman SB,
+A quantitative measure of continuity of care,
+\textit{Med Care}, 1977;15(4):347--349,
+doi:10.1097/00005650-197704000-00010
+
+\bibitem{breslau1976}
+Breslau N, Haug MR,
+Service delivery structure and continuity of care: a case study of a pediatric practice in process of reorganization,
+\textit{J Health Soc Behav}, 1976;17(4):339--352
+
+\end{thebibliography}
+
+\end{document}

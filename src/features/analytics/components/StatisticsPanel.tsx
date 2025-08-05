@@ -7,6 +7,7 @@ import {
   CardDescription,
 } from "../../../shared/components/ui/card";
 import { AppointmentHistogram } from "./AppointmentHistogram";
+import { RollingContChart } from "./RollingContChart";
 import {
   Pie,
   PieChart,
@@ -34,6 +35,10 @@ interface ProcessingStatistics {
     cocIndex?: number;
     seconIndex?: number;
     mmciIndex?: number;
+    rollingContIndex?: {
+      monthlyScores: Record<string, number>;
+      averageScore?: number;
+    };
     topProviders?: Record<string, Record<string, number>>;
     appointmentCountDistribution?: Record<string, number>;
   };
@@ -109,6 +114,11 @@ export const StatisticsPanel: React.FC<StatisticsPanelProps> = ({
   };
 
   const formatMmciIndex = (index?: number) => {
+    if (index === undefined) return "Not calculated";
+    return (index * 100).toFixed(2) + "%";
+  };
+
+  const formatRollingContIndex = (index?: number) => {
     if (index === undefined) return "Not calculated";
     return (index * 100).toFixed(2) + "%";
   };
@@ -609,6 +619,61 @@ export const StatisticsPanel: React.FC<StatisticsPanelProps> = ({
           </div>
         </CardContent>
       </Card>
+
+      {/* Rolling Continuity of Care Index */}
+      <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">
+              Rolling Continuity of Care Index
+            </CardTitle>
+            <CardDescription>
+              Measures clinic-level continuity on a month-by-month basis by tracking what percentage
+              of patients see the same provider as their previous appointment
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+          <div className="flex flex-col gap-4">
+            <div>
+              <p className="text-sm font-medium text-gray-500 mb-2">
+                Rolling Continuity Index - Monthly Trend:
+              </p>
+              {statistics.filtered.rollingContIndex?.monthlyScores && 
+                Object.keys(statistics.filtered.rollingContIndex.monthlyScores).length > 0 ? (
+                <RollingContChart 
+                  monthlyScores={statistics.filtered.rollingContIndex.monthlyScores} 
+                  title="Rolling Continuity Trend"
+                />
+              ) : (
+                <div className="text-center p-4 bg-gray-50 rounded border">
+                  <p className="text-gray-500">No rolling continuity data available</p>
+                </div>
+              )}
+              
+              <div className="mt-2">
+                <p className="text-xs text-gray-500">
+                  This metric shows the percentage of follow-up appointments where patients saw the same provider
+                  as their previous visit, calculated on a monthly basis.
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Higher values indicate better month-to-month continuity at the clinic level.
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Note: Patients with only one appointment in a month are excluded from that month's calculation.
+                </p>
+              </div>
+            </div>
+            
+            <div className="mt-2">
+              <p className="text-sm font-medium text-gray-500">
+                Average Rolling Continuity Index:
+              </p>
+              <p className="text-xl font-medium">
+                {formatRollingContIndex(statistics.filtered.rollingContIndex?.averageScore)}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+        </Card>
 
       {/* Appointment Distribution Histogram */}
       <Card>

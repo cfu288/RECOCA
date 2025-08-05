@@ -127,15 +127,18 @@ export const RecentFiles: React.FC<RecentFilesProps> = ({ onFileSelect }) => {
       });
 
       // Get column mapping if it exists
-      const columnMapping = recentFile.columnMapping;
-      // Check if the electron API has the getColumnMapping method
-      if (!recentFile.columnMapping && "getColumnMapping" in window.electron) {
+      let columnMapping = recentFile.columnMapping;
+      
+      // If no column mapping exists on the recent file, try to get it from storage
+      if (!columnMapping && "getColumnMapping" in window.electron) {
         try {
           const mapping = await (window.electron as any).getColumnMapping(
             recentFile.name
           );
           if (mapping) {
-            console.log("Retrieved column mapping:", mapping);
+            console.log("Retrieved column mapping from storage:", mapping);
+            columnMapping = mapping;
+            // Update the recent files list with the mapping
             setRecentFiles((prev) =>
               prev.map((f) =>
                 f.path === recentFile.path
@@ -149,6 +152,8 @@ export const RecentFiles: React.FC<RecentFilesProps> = ({ onFileSelect }) => {
         }
       }
 
+      console.log("Setting active file with column mapping:", columnMapping);
+      
       setActiveFile({
         name: recentFile.name,
         file: file,

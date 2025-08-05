@@ -1,0 +1,725 @@
+{
+  "timestamp": "2025-07-26T06:28:27.555Z",
+  "results": [
+    {
+      "scenario": "sameprovider0_doctors1",
+      "description": "SP: 0%, Doctors: 1, Patients: 500",
+      "patients": 500,
+      "appointments": 2510,
+      "sameProviderRate": 1,
+      "indices": {
+        "UPC": 1,
+        "COC": 1,
+        "SECON": 1,
+        "MMCI": 1,
+        "RollingCont": 1
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider0_doctors3",
+      "description": "SP: 0%, Doctors: 3, Patients: 500",
+      "patients": 500,
+      "appointments": 2484,
+      "sameProviderRate": 0,
+      "indices": {
+        "UPC": 0.47159047619047617,
+        "COC": 0.2250761904761904,
+        "SECON": 0.002333333333333333,
+        "MMCI": 0.5036565057721376,
+        "RollingCont": 0
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider0_doctors5",
+      "description": "SP: 0%, Doctors: 5, Patients: 500",
+      "patients": 500,
+      "appointments": 2507,
+      "sameProviderRate": 0,
+      "indices": {
+        "UPC": 0.3858047619047621,
+        "COC": 0.12464761904761903,
+        "SECON": 0.0022333333333333333,
+        "MMCI": 0.3268694054862016,
+        "RollingCont": 0
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider0_doctors10",
+      "description": "SP: 0%, Doctors: 10, Patients: 500",
+      "patients": 500,
+      "appointments": 2481,
+      "sameProviderRate": 0,
+      "indices": {
+        "UPC": 0.3156047619047621,
+        "COC": 0.057942857142857136,
+        "SECON": 0.0011333333333333332,
+        "MMCI": 0.17349892427595684,
+        "RollingCont": 0
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider0_doctors20",
+      "description": "SP: 0%, Doctors: 20, Patients: 500",
+      "patients": 500,
+      "appointments": 2408,
+      "sameProviderRate": 0,
+      "indices": {
+        "UPC": 0.278004761904762,
+        "COC": 0.02789523809523809,
+        "SECON": 0.0004,
+        "MMCI": 0.09721541942543477,
+        "RollingCont": 0
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider0_doctors50",
+      "description": "SP: 0%, Doctors: 50, Patients: 500",
+      "patients": 500,
+      "appointments": 2532,
+      "sameProviderRate": 0,
+      "indices": {
+        "UPC": 0.23844761904761902,
+        "COC": 0.010304761904761905,
+        "SECON": 0,
+        "MMCI": 0.056039420682436294,
+        "RollingCont": 0
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider0_doctors100",
+      "description": "SP: 0%, Doctors: 100, Patients: 500",
+      "patients": 500,
+      "appointments": 2529,
+      "sameProviderRate": 0,
+      "indices": {
+        "UPC": 0.22630476190476206,
+        "COC": 0.004838095238095238,
+        "SECON": 0,
+        "MMCI": 0.040215721428063775,
+        "RollingCont": 0
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider0_doctors200",
+      "description": "SP: 0%, Doctors: 200, Patients: 500",
+      "patients": 500,
+      "appointments": 2473,
+      "sameProviderRate": 0,
+      "indices": {
+        "UPC": 0.22631428571428566,
+        "COC": 0.0033428571428571426,
+        "SECON": 0,
+        "MMCI": 0.03618231969884853,
+        "RollingCont": 0
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider20_doctors1",
+      "description": "SP: 20%, Doctors: 1, Patients: 1537",
+      "patients": 1537,
+      "appointments": 7594,
+      "sameProviderRate": 1,
+      "indices": {
+        "UPC": 1,
+        "COC": 1,
+        "SECON": 1,
+        "MMCI": 1,
+        "RollingCont": 1
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider20_doctors3",
+      "description": "SP: 20%, Doctors: 3, Patients: 1537",
+      "patients": 1537,
+      "appointments": 7621,
+      "sameProviderRate": 0.46299999999999997,
+      "indices": {
+        "UPC": 0.61428416519503,
+        "COC": 0.3951172661647612,
+        "SECON": 0.45723270440251573,
+        "MMCI": 0.6404010521247975,
+        "RollingCont": 0.4590552595796787
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider20_doctors5",
+      "description": "SP: 20%, Doctors: 5, Patients: 1537",
+      "patients": 1537,
+      "appointments": 7693,
+      "sameProviderRate": 0.35700000000000004,
+      "indices": {
+        "UPC": 0.5200855098057442,
+        "COC": 0.2722062149518233,
+        "SECON": 0.3513554543482975,
+        "MMCI": 0.5036418921150132,
+        "RollingCont": 0.41033739949890463
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider20_doctors10",
+      "description": "SP: 20%, Doctors: 10, Patients: 1537",
+      "patients": 1537,
+      "appointments": 7711,
+      "sameProviderRate": 0.27,
+      "indices": {
+        "UPC": 0.44731077857297824,
+        "COC": 0.18927409610558601,
+        "SECON": 0.2734873129472999,
+        "MMCI": 0.3764411018676153,
+        "RollingCont": 0.2657796100861644
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider20_doctors20",
+      "description": "SP: 20%, Doctors: 20, Patients: 1537",
+      "patients": 1537,
+      "appointments": 7614,
+      "sameProviderRate": 0.23199999999999998,
+      "indices": {
+        "UPC": 0.40738761347089225,
+        "COC": 0.14347368094928276,
+        "SECON": 0.233409238776838,
+        "MMCI": 0.2986680066443117,
+        "RollingCont": 0.2322865254557215
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider20_doctors50",
+      "description": "SP: 20%, Doctors: 50, Patients: 1537",
+      "patients": 1537,
+      "appointments": 7675,
+      "sameProviderRate": 0.22399999999999998,
+      "indices": {
+        "UPC": 0.37923289029339763,
+        "COC": 0.12154475322985406,
+        "SECON": 0.22051615701583172,
+        "MMCI": 0.2614319003654232,
+        "RollingCont": 0.22220263005177054
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider20_doctors100",
+      "description": "SP: 20%, Doctors: 100, Patients: 1537",
+      "patients": 1537,
+      "appointments": 7722,
+      "sameProviderRate": 0.214,
+      "indices": {
+        "UPC": 0.37397682560337075,
+        "COC": 0.11709266660470301,
+        "SECON": 0.21604857948384296,
+        "MMCI": 0.24801855989368582,
+        "RollingCont": 0.2138728640213723
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider20_doctors200",
+      "description": "SP: 20%, Doctors: 200, Patients: 1537",
+      "patients": 1537,
+      "appointments": 7690,
+      "sameProviderRate": 0.20199999999999999,
+      "indices": {
+        "UPC": 0.3573860643802088,
+        "COC": 0.0987359420020448,
+        "SECON": 0.19648666232921275,
+        "MMCI": 0.2256664252870591,
+        "RollingCont": 0.2008456757615447
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider40_doctors1",
+      "description": "SP: 40%, Doctors: 1, Patients: 2305",
+      "patients": 2305,
+      "appointments": 11547,
+      "sameProviderRate": 1,
+      "indices": {
+        "UPC": 1,
+        "COC": 1,
+        "SECON": 1,
+        "MMCI": 1,
+        "RollingCont": 1
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider40_doctors3",
+      "description": "SP: 40%, Doctors: 3, Patients: 2305",
+      "patients": 2305,
+      "appointments": 11522,
+      "sameProviderRate": 0.599,
+      "indices": {
+        "UPC": 0.6809978308026028,
+        "COC": 0.48947629377130464,
+        "SECON": 0.5961171366594359,
+        "MMCI": 0.7083243382118884,
+        "RollingCont": 0.5914490193955476
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider40_doctors5",
+      "description": "SP: 40%, Doctors: 5, Patients: 2305",
+      "patients": 2305,
+      "appointments": 11515,
+      "sameProviderRate": 0.521,
+      "indices": {
+        "UPC": 0.606000413180457,
+        "COC": 0.38551389319285195,
+        "SECON": 0.5149963846710052,
+        "MMCI": 0.6081091976039581,
+        "RollingCont": 0.5252507939457426
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider40_doctors10",
+      "description": "SP: 40%, Doctors: 10, Patients: 2305",
+      "patients": 2305,
+      "appointments": 11564,
+      "sameProviderRate": 0.45799999999999996,
+      "indices": {
+        "UPC": 0.5456471438900944,
+        "COC": 0.30896188410288195,
+        "SECON": 0.45507592190889384,
+        "MMCI": 0.5153598079687302,
+        "RollingCont": 0.45907156057115367
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider40_doctors20",
+      "description": "SP: 40%, Doctors: 20, Patients: 2305",
+      "patients": 2305,
+      "appointments": 11547,
+      "sameProviderRate": 0.435,
+      "indices": {
+        "UPC": 0.522015287676893,
+        "COC": 0.2780683813655614,
+        "SECON": 0.43624005784526393,
+        "MMCI": 0.4778741137364657,
+        "RollingCont": 0.43848085328643466
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider40_doctors50",
+      "description": "SP: 40%, Doctors: 50, Patients: 2305",
+      "patients": 2305,
+      "appointments": 11474,
+      "sameProviderRate": 0.408,
+      "indices": {
+        "UPC": 0.49103811589711827,
+        "COC": 0.24387356678029126,
+        "SECON": 0.4055242227042661,
+        "MMCI": 0.4343629318645934,
+        "RollingCont": 0.40842699373019614
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider40_doctors100",
+      "description": "SP: 40%, Doctors: 100, Patients: 2305",
+      "patients": 2305,
+      "appointments": 11520,
+      "sameProviderRate": 0.39899999999999997,
+      "indices": {
+        "UPC": 0.48287883483111355,
+        "COC": 0.2337651069104432,
+        "SECON": 0.39603036876355746,
+        "MMCI": 0.4193804864081341,
+        "RollingCont": 0.3668603305626312
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider40_doctors200",
+      "description": "SP: 40%, Doctors: 200, Patients: 2305",
+      "patients": 2305,
+      "appointments": 11469,
+      "sameProviderRate": 0.409,
+      "indices": {
+        "UPC": 0.4874599731432706,
+        "COC": 0.24216299969011462,
+        "SECON": 0.40890093998553867,
+        "MMCI": 0.4284210308313198,
+        "RollingCont": 0.3777382903019309
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider60_doctors1",
+      "description": "SP: 60%, Doctors: 1, Patients: 2305",
+      "patients": 2305,
+      "appointments": 11376,
+      "sameProviderRate": 1,
+      "indices": {
+        "UPC": 1,
+        "COC": 1,
+        "SECON": 1,
+        "MMCI": 1,
+        "RollingCont": 1
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider60_doctors3",
+      "description": "SP: 60%, Doctors: 3, Patients: 2305",
+      "patients": 2305,
+      "appointments": 11592,
+      "sameProviderRate": 0.723,
+      "indices": {
+        "UPC": 0.749136452845781,
+        "COC": 0.5968680921392419,
+        "SECON": 0.7236514822848881,
+        "MMCI": 0.781164066252782,
+        "RollingCont": 0.7419996861130029
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider60_doctors5",
+      "description": "SP: 60%, Doctors: 5, Patients: 2305",
+      "patients": 2305,
+      "appointments": 11580,
+      "sameProviderRate": 0.674,
+      "indices": {
+        "UPC": 0.6998946389835756,
+        "COC": 0.5237661398615846,
+        "SECON": 0.6708893709327549,
+        "MMCI": 0.7191990650235682,
+        "RollingCont": 0.6277317771611096
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider60_doctors10",
+      "description": "SP: 60%, Doctors: 10, Patients: 2305",
+      "patients": 2305,
+      "appointments": 11450,
+      "sameProviderRate": 0.6409999999999999,
+      "indices": {
+        "UPC": 0.6637527114967465,
+        "COC": 0.47395723582274557,
+        "SECON": 0.6417859725234996,
+        "MMCI": 0.6739727181218289,
+        "RollingCont": 0.642272846878201
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider60_doctors20",
+      "description": "SP: 60%, Doctors: 20, Patients: 2305",
+      "patients": 2305,
+      "appointments": 11494,
+      "sameProviderRate": 0.624,
+      "indices": {
+        "UPC": 0.6469424646214229,
+        "COC": 0.44655923974795986,
+        "SECON": 0.6186334056399132,
+        "MMCI": 0.6444827133978303,
+        "RollingCont": 0.6211095135451811
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider60_doctors50",
+      "description": "SP: 60%, Doctors: 50, Patients: 2305",
+      "patients": 2305,
+      "appointments": 11481,
+      "sameProviderRate": 0.607,
+      "indices": {
+        "UPC": 0.6286075818613773,
+        "COC": 0.4251626898047723,
+        "SECON": 0.6075126536514823,
+        "MMCI": 0.6239802401209332,
+        "RollingCont": 0.6089018119945123
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider60_doctors100",
+      "description": "SP: 60%, Doctors: 100, Patients: 2305",
+      "patients": 2305,
+      "appointments": 11505,
+      "sameProviderRate": 0.609,
+      "indices": {
+        "UPC": 0.6265706022105152,
+        "COC": 0.4243817787418655,
+        "SECON": 0.6062834417932031,
+        "MMCI": 0.6202262377681412,
+        "RollingCont": 0.6096362546988302
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider60_doctors200",
+      "description": "SP: 60%, Doctors: 200, Patients: 2305",
+      "patients": 2305,
+      "appointments": 11566,
+      "sameProviderRate": 0.603,
+      "indices": {
+        "UPC": 0.6192552422270431,
+        "COC": 0.4124718520813966,
+        "SECON": 0.5995733911785971,
+        "MMCI": 0.6133631664860179,
+        "RollingCont": 0.6033606416976078
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider80_doctors1",
+      "description": "SP: 80%, Doctors: 1, Patients: 1537",
+      "patients": 1537,
+      "appointments": 7756,
+      "sameProviderRate": 1,
+      "indices": {
+        "UPC": 1,
+        "COC": 1,
+        "SECON": 1,
+        "MMCI": 1,
+        "RollingCont": 1
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider80_doctors3",
+      "description": "SP: 80%, Doctors: 3, Patients: 1537",
+      "patients": 1537,
+      "appointments": 7781,
+      "sameProviderRate": 0.866,
+      "indices": {
+        "UPC": 0.8602921585029585,
+        "COC": 0.7727081203333643,
+        "SECON": 0.8696161353285621,
+        "MMCI": 0.8856267920346205,
+        "RollingCont": 0.8659852155496397
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider80_doctors5",
+      "description": "SP: 80%, Doctors: 5, Patients: 1537",
+      "patients": 1537,
+      "appointments": 7673,
+      "sameProviderRate": 0.8440000000000001,
+      "indices": {
+        "UPC": 0.8326749697927315,
+        "COC": 0.732183908045977,
+        "SECON": 0.8431793537193667,
+        "MMCI": 0.8561813761621054,
+        "RollingCont": 0.8444954253950696
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider80_doctors10",
+      "description": "SP: 80%, Doctors: 10, Patients: 1537",
+      "patients": 1537,
+      "appointments": 7709,
+      "sameProviderRate": 0.8109999999999999,
+      "indices": {
+        "UPC": 0.7958887133252773,
+        "COC": 0.6727329057843046,
+        "SECON": 0.8061049663847321,
+        "MMCI": 0.8182951152678904,
+        "RollingCont": 0.8112887304626731
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider80_doctors20",
+      "description": "SP: 80%, Doctors: 20, Patients: 1537",
+      "patients": 1537,
+      "appointments": 7700,
+      "sameProviderRate": 0.8079999999999999,
+      "indices": {
+        "UPC": 0.797868451219134,
+        "COC": 0.6743377637326888,
+        "SECON": 0.807948384298417,
+        "MMCI": 0.8163897899184396,
+        "RollingCont": 0.8092665635747335
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider80_doctors50",
+      "description": "SP: 80%, Doctors: 50, Patients: 1537",
+      "patients": 1537,
+      "appointments": 7623,
+      "sameProviderRate": 0.7959999999999999,
+      "indices": {
+        "UPC": 0.7822040462248658,
+        "COC": 0.6516466833968461,
+        "SECON": 0.7925721101713294,
+        "MMCI": 0.8008037640443997,
+        "RollingCont": 0.7971435938378176
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider80_doctors100",
+      "description": "SP: 80%, Doctors: 100, Patients: 1537",
+      "patients": 1537,
+      "appointments": 7700,
+      "sameProviderRate": 0.809,
+      "indices": {
+        "UPC": 0.7930879573690243,
+        "COC": 0.6698330080242897,
+        "SECON": 0.805617002819345,
+        "MMCI": 0.8126320928242493,
+        "RollingCont": 0.8127963709570213
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider80_doctors200",
+      "description": "SP: 80%, Doctors: 200, Patients: 1537",
+      "patients": 1537,
+      "appointments": 7638,
+      "sameProviderRate": 0.7979999999999999,
+      "indices": {
+        "UPC": 0.78696595098677,
+        "COC": 0.6613315983517676,
+        "SECON": 0.7994252873563217,
+        "MMCI": 0.8058784755243913,
+        "RollingCont": 0.8119643366277335
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider100_doctors1",
+      "description": "SP: 100%, Doctors: 1, Patients: 500",
+      "patients": 500,
+      "appointments": 2510,
+      "sameProviderRate": 1,
+      "indices": {
+        "UPC": 1,
+        "COC": 1,
+        "SECON": 1,
+        "MMCI": 1,
+        "RollingCont": 1
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider100_doctors3",
+      "description": "SP: 100%, Doctors: 3, Patients: 500",
+      "patients": 500,
+      "appointments": 2447,
+      "sameProviderRate": 1,
+      "indices": {
+        "UPC": 1,
+        "COC": 1,
+        "SECON": 1,
+        "MMCI": 1,
+        "RollingCont": 1
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider100_doctors5",
+      "description": "SP: 100%, Doctors: 5, Patients: 500",
+      "patients": 500,
+      "appointments": 2538,
+      "sameProviderRate": 1,
+      "indices": {
+        "UPC": 1,
+        "COC": 1,
+        "SECON": 1,
+        "MMCI": 1,
+        "RollingCont": 1
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider100_doctors10",
+      "description": "SP: 100%, Doctors: 10, Patients: 500",
+      "patients": 500,
+      "appointments": 2530,
+      "sameProviderRate": 1,
+      "indices": {
+        "UPC": 1,
+        "COC": 1,
+        "SECON": 1,
+        "MMCI": 1,
+        "RollingCont": 1
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider100_doctors20",
+      "description": "SP: 100%, Doctors: 20, Patients: 500",
+      "patients": 500,
+      "appointments": 2551,
+      "sameProviderRate": 1,
+      "indices": {
+        "UPC": 1,
+        "COC": 1,
+        "SECON": 1,
+        "MMCI": 1,
+        "RollingCont": 1
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider100_doctors50",
+      "description": "SP: 100%, Doctors: 50, Patients: 500",
+      "patients": 500,
+      "appointments": 2507,
+      "sameProviderRate": 1,
+      "indices": {
+        "UPC": 1,
+        "COC": 1,
+        "SECON": 1,
+        "MMCI": 1,
+        "RollingCont": 1
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider100_doctors100",
+      "description": "SP: 100%, Doctors: 100, Patients: 500",
+      "patients": 500,
+      "appointments": 2448,
+      "sameProviderRate": 1,
+      "indices": {
+        "UPC": 1,
+        "COC": 1,
+        "SECON": 1,
+        "MMCI": 1,
+        "RollingCont": 1
+      },
+      "errors": []
+    },
+    {
+      "scenario": "sameprovider100_doctors200",
+      "description": "SP: 100%, Doctors: 200, Patients: 500",
+      "patients": 500,
+      "appointments": 2504,
+      "sameProviderRate": 1,
+      "indices": {
+        "UPC": 1,
+        "COC": 1,
+        "SECON": 1,
+        "MMCI": 1,
+        "RollingCont": 1
+      },
+      "errors": []
+    }
+  ]
+}

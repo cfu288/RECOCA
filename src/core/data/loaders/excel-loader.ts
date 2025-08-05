@@ -74,21 +74,50 @@ export function isExcelDateSerial(value: unknown): boolean {
 
 /**
  * Converts a specific Excel sheet to JSON format for data processing.
- * Optimized for performance by avoiding upfront date conversion.
+ * Automatically converts Excel date serial numbers to ISO date strings.
  * @throws {Error} When the sheet cannot be found or converted
  */
 export function convertSheetToJSON(
   fileBuffer: Buffer,
   sheetName: string
 ): object[] {
-  const workbook = XLSX.read(fileBuffer, { type: "buffer", cellDates: false });
+  // Read with cellDates: true to automatically convert Excel dates to JavaScript dates
+  // Also use UTC: true to prevent timezone issues
+  const workbook = XLSX.read(fileBuffer, { 
+    type: "buffer", 
+    cellDates: true,
+    UTC: true 
+  });
   const worksheet = workbook.Sheets[sheetName];
 
   if (!worksheet) {
     throw new Error(`Sheet "${sheetName}" not found in workbook`);
   }
 
-  return XLSX.utils.sheet_to_json(worksheet);
+  // Convert to JSON - dates will be JavaScript Date objects
+  const jsonData = XLSX.utils.sheet_to_json(worksheet);
+  
+  // Convert Date objects to ISO strings for consistency with CSV processing
+  return jsonData.map((row) => {
+    const convertedRow: any = {};
+    for (const [key, value] of Object.entries(row)) {
+      if (value instanceof Date) {
+        // Convert Date to ISO string format (YYYY-MM-DD)
+        convertedRow[key] = value.toISOString().split('T')[0];
+      } else if (isExcelDateSerial(value)) {
+        // Handle Excel date serial numbers that weren't converted by cellDates: true
+        try {
+          const jsDate = excelDateToJSDate(value as number);
+          convertedRow[key] = jsDate.toISOString().split('T')[0];
+        } catch {
+          convertedRow[key] = value;
+        }
+      } else {
+        convertedRow[key] = value;
+      }
+    }
+    return convertedRow;
+  });
 }
 
 /**

@@ -136,12 +136,7 @@ export const UploadFileScreen: React.FC<{
   };
 
   const handleRecentFileSelect = async (file: File) => {
-    setActiveFile({
-      name: file.name,
-      file: file,
-      size: file.size,
-    });
-
+    // Don't override activeFile here as RecentFiles component already sets it with columnMapping
     await processFile(file);
   };
 

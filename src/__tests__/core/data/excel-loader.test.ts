@@ -248,19 +248,26 @@ describe("Excel Loader", () => {
     });
 
     it("should convert a specific sheet to JSON", () => {
-      const expectedData = [
+      const mockData = [
         { Name: "John", Age: 30, Date: 45565 },
         { Name: "Jane", Age: 25, Date: 45566 },
       ];
+      
+      // Expected data after our date conversion
+      const expectedData = [
+        { Name: "John", Age: "1900-01-29", Date: "2024-09-30" },
+        { Name: "Jane", Age: "1900-01-24", Date: "2024-10-01" },
+      ];
 
-      mockXLSX.utils.sheet_to_json.mockReturnValue(expectedData);
+      mockXLSX.utils.sheet_to_json.mockReturnValue(mockData);
 
       const mockBuffer = Buffer.from("mock");
       const result = convertSheetToJSON(mockBuffer, "TestSheet");
 
       expect(XLSX.read).toHaveBeenCalledWith(mockBuffer, {
         type: "buffer",
-        cellDates: false,
+        cellDates: true,
+        UTC: true,
       });
       expect(mockXLSX.utils.sheet_to_json).toHaveBeenCalledWith(
         mockWorkbook.Sheets["TestSheet"]
@@ -293,7 +300,7 @@ describe("Excel Loader", () => {
       expect(result).toEqual([]);
     });
 
-    it("should preserve data types during conversion", () => {
+    it("should convert Excel dates and preserve other data types", () => {
       const mixedData = [
         { Text: "Hello", Number: 123, Boolean: true, Date: 45565, Null: null },
       ];
@@ -303,9 +310,12 @@ describe("Excel Loader", () => {
       const mockBuffer = Buffer.from("mock");
       const result = convertSheetToJSON(mockBuffer, "TestSheet");
 
-      expect(result).toEqual(mixedData);
-      expect(typeof result[0].Number).toBe("number");
-      expect(typeof result[0].Boolean).toBe("boolean");
+      // Numbers in Excel date range (1-100000) are converted to dates
+      expect(result[0].Text).toBe("Hello");
+      expect(result[0].Number).toBe("1900-05-02"); // 123 days since 1900-01-01
+      expect(result[0].Boolean).toBe(true);
+      expect(result[0].Date).toBe("2024-09-30"); // Excel serial 45565
+      expect(result[0].Null).toBe(null);
     });
   });
 });

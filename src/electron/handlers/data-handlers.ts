@@ -11,6 +11,7 @@ import { calculateUpcIndex } from "../../core/continuity/indices/upc-index";
 import { calculateCocIndex } from "../../core/continuity/indices/coc-index";
 import { calculateSeconIndex } from "../../core/continuity/indices/secon-index";
 import { calculateMmciIndex } from "../../core/continuity/indices/mmci-index";
+import { calculateRollingContIndex } from "../../core/continuity/indices/rolling-cont-index";
 
 interface ValidationResult {
   isValid: boolean;
@@ -413,6 +414,17 @@ export function registerDataHandlers() {
           columnMapping.patientIdentifier
         );
 
+        // Calculate rolling continuity index if appointment date is available
+        let filteredRollingContResult = undefined;
+        if (columnMapping.appointmentDate) {
+          filteredRollingContResult = calculateRollingContIndex(
+            filteredDf,
+            columnMapping.residentIdentifier,
+            columnMapping.patientIdentifier,
+            columnMapping.appointmentDate
+          );
+        }
+
         // Calculate filtered appointment distribution
         const filteredAppointmentDistribution = calculateAppointmentDistribution(
           filteredDf,
@@ -453,6 +465,7 @@ export function registerDataHandlers() {
               cocIndex: filteredCocResult.averageCoc,
               seconIndex: filteredSeconResult.averageSecon,
               mmciIndex: filteredMmciResult.averageMmci,
+              rollingContIndex: filteredRollingContResult,
               appointmentCountDistribution: filteredAppointmentDistribution,
             },
             total: {

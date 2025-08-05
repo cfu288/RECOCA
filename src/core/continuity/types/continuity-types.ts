@@ -25,3 +25,16 @@ export interface UpcIndexResult {
   averageUpc: number | undefined;
   patientUpcScores: PatientContinuityScores;
 }
+
+export interface RollingContIndexResult {
+  monthlyScores: Record<string, number>;
+  averageScore: number | undefined;
+}
+
+export type RollingContPeriodType = 'day' | 'week' | 'month' | 'custom';
+
+export interface RollingContIndexResultGeneric {
+  periodScores: Record<string, number>;
+  averageScore: number | undefined;
+  periodType: RollingContPeriodType;
+}

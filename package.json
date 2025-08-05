@@ -13,7 +13,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:types": "ts-node --transpileOnly=false node_modules/.bin/jest",
-    "make:test": "electron-forge make && open out/make/zip/darwin/arm64/*.zip"
+    "make:test": "electron-forge make && open out/make/zip/darwin/arm64/*.zip",
+    "generate-mock-data": "ts-node scripts/generate-mock-data.ts"
   },
   "keywords": [],
   "author": {
@@ -91,6 +92,7 @@
     "sonner": "^2.0.1",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
+    "tsx": "^4.20.3",
     "xlsx": "^0.18.5",
     "zod": "^3.24.2"
   }
